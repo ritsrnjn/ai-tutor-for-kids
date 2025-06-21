@@ -322,6 +322,42 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
+
+        /* New states for WebSocket integration */
+        .character-face.ready {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
+        }
+
+        .character-face.connected {
+            background: linear-gradient(135deg, #2196F3, #64B5F6);
+            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.4);
+        }
+
+        /* Connection status improvements */
+        .connection-status {
+            animation: slideInFromRight 0.3s ease;
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced status messages */
+        .status-item.websocket {
+            border-left-color: #FF9800;
+        }
+
+        .status-item.elevenlabs {
+            border-left-color: #9C27B0;
+        }
     </style>
 </head>
 <body>
@@ -380,17 +416,44 @@
         </div>
     </div>
 
-            <script>
+    <!-- Socket.IO Client Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+
+    <script>
+        // WebSocket and audio streaming variables
+        let socket;
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
         let currentTopic = null;
+        let isConnected = false;
+        let conversationActive = false;
+        let useElevenLabs = false; // Will be determined by server response
+        let audioStream;
+        let audioContext;
+        let audioBuffer = [];
 
+        // DOM elements
         let recordButton, status, buttonText, aiCharacter, soundWaves, topicSelection, voiceControls, spacebarHint;
 
-        // Initialize DOM elements when page loads
+        // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing DOM elements');
+            console.log('🚀 Initializing AI Tutor with WebSocket support');
+
+            // Initialize DOM elements
+            initializeDOMElements();
+
+            // Setup WebSocket connection
+            initializeWebSocket();
+
+            // Setup audio recording
+            initializeAudioRecording();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        function initializeDOMElements() {
             recordButton = document.getElementById('recordButton');
             status = document.getElementById('status');
             buttonText = document.getElementById('buttonText');
@@ -400,11 +463,164 @@
             voiceControls = document.getElementById('voiceControls');
             spacebarHint = document.getElementById('spacebarHint');
 
-            console.log('Elements found:', {
+            console.log('📋 DOM elements initialized:', {
                 recordButton: !!recordButton,
                 topicSelection: !!topicSelection,
                 voiceControls: !!voiceControls
             });
+        }
+
+        function initializeWebSocket() {
+            console.log('🔌 Connecting to WebSocket server...');
+            socket = io();
+
+            // Connection events
+            socket.on('connect', () => {
+                console.log('✅ Connected to server');
+                isConnected = true;
+                addStatusMessage('system', '🔗 Connected to server - ready for conversation!');
+                updateConnectionStatus('connected');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('❌ Disconnected from server');
+                isConnected = false;
+                conversationActive = false;
+                addStatusMessage('system', '🔌 Disconnected from server - trying to reconnect...');
+                updateConnectionStatus('disconnected');
+                setCharacterState('');
+            });
+
+            socket.on('reconnect', () => {
+                console.log('🔄 Reconnected to server');
+                addStatusMessage('system', '✅ Reconnected to server!');
+                updateConnectionStatus('connected');
+            });
+
+            // ElevenLabs-specific events
+            socket.on('conversation_started', (data) => {
+                console.log('🎯 Conversation started:', data);
+                conversationActive = data.success;
+                if (data.success) {
+                    useElevenLabs = true;
+                    showVoiceControls(data.topic || currentTopic || 'general');
+                } else {
+                    addStatusMessage('system', `❌ Failed to start conversation: ${data.error}`);
+                }
+            });
+
+            socket.on('conversation_ended', (data) => {
+                console.log('🛑 Conversation ended:', data);
+                conversationActive = false;
+                addStatusMessage('system', '👋 Conversation ended. Choose a new topic to continue learning!');
+                setCharacterState('');
+                // Show topic selection again
+                resetToTopicSelection();
+            });
+
+            socket.on('agent_response', (data) => {
+                console.log('🤖 Agent response:', data.response);
+                addStatusMessage('ai', data.response);
+                setCharacterState('talking');
+                // The audio will be handled by ElevenLabs directly
+            });
+
+            socket.on('user_transcript', (data) => {
+                console.log('🎤 User transcript:', data.transcript);
+                addStatusMessage('user', data.transcript);
+            });
+
+            socket.on('agent_response_correction', (data) => {
+                console.log('🛠️ Agent correction:', data);
+                addStatusMessage('system', `Correction: ${data.original} → ${data.corrected}`);
+            });
+
+            socket.on('latency_measurement', (data) => {
+                console.log('⚡ Latency:', data.latency + 'ms');
+                // Optional: show latency in UI for debugging
+            });
+
+            socket.on('session_ended', (data) => {
+                console.log('🔚 Session ended:', data.conversation_id);
+                addStatusMessage('system', `Session completed. ID: ${data.conversation_id}`);
+                conversationActive = false;
+                setCharacterState('');
+            });
+
+            socket.on('error', (data) => {
+                console.error('❌ Socket error:', data);
+                addStatusMessage('system', `Error: ${data.error}`);
+                setCharacterState('');
+            });
+
+            socket.on('status_update', (data) => {
+                console.log('📊 Status update:', data);
+                conversationActive = data.session_active;
+                currentTopic = data.current_topic;
+            });
+        }
+
+        function initializeAudioRecording() {
+            console.log('🎙️ Initializing audio recording...');
+
+            // Request microphone permission
+            navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    sampleRate: 16000
+                }
+            })
+            .then(stream => {
+                audioStream = stream;
+
+                // Initialize MediaRecorder for streaming
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+
+                // Handle data available for real-time streaming
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0 && conversationActive) {
+                        // Convert to base64 and stream immediately for ElevenLabs
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result.split(',')[1];
+                            streamAudioChunk(base64Audio);
+                        };
+                        reader.readAsDataURL(event.data);
+                    } else if (event.data.size > 0) {
+                        // For Sarvam, collect chunks as before
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    if (!conversationActive && audioChunks.length > 0) {
+                        // Sarvam integration - send complete audio
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        audioChunks = [];
+
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result.split(',')[1];
+                            sendAudioToServer(base64Audio);
+                        };
+                        reader.readAsDataURL(audioBlob);
+                    }
+                };
+
+                addStatusMessage('system', '🎤 Microphone access granted! Ready to chat.');
+            })
+            .catch(err => {
+                addStatusMessage('system', '❌ Microphone access denied. Please allow microphone access to use the voice assistant.');
+                console.error('Error accessing microphone:', err);
+            });
+        }
+
+        function setupEventListeners() {
+            console.log('🔧 Setting up event listeners...');
 
             // Set up topic button listeners
             setupTopicListeners();
@@ -419,36 +635,19 @@
                     }
                 });
             }
-        });
 
-        // Request microphone permission on page load
-        navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                mediaRecorder = new MediaRecorder(stream);
-
-                mediaRecorder.ondataavailable = event => {
-                    audioChunks.push(event.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                    audioChunks = [];
-
-                    // Convert to base64
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        const base64Audio = reader.result.split(',')[1];
-                        sendAudioToServer(base64Audio);
-                    };
-                    reader.readAsDataURL(audioBlob);
-                };
-
-                addStatusMessage('system', 'Microphone access granted! Ready to chat.');
-            })
-            .catch(err => {
-                addStatusMessage('system', 'Microphone access denied. Please allow microphone access to use the voice assistant.');
-                console.error('Error accessing microphone:', err);
+            // Spacebar event listener
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    if (!isRecording) {
+                        startRecording();
+                    } else {
+                        stopRecording();
+                    }
+                }
             });
+        }
 
         function setCharacterState(state) {
             aiCharacter.className = 'ai-character';
@@ -456,10 +655,95 @@
                 aiCharacter.classList.add(state);
             }
 
+            // Update sound waves visibility
             if (state === 'listening') {
                 soundWaves.style.display = 'block';
             } else {
                 soundWaves.style.display = 'none';
+            }
+
+            // Update button text based on state
+            if (recordButton && buttonText) {
+                switch(state) {
+                    case 'listening':
+                        buttonText.innerHTML = '🔴<br>Stop';
+                        recordButton.classList.add('recording');
+                        break;
+                    case 'talking':
+                        buttonText.innerHTML = '🗣️<br>Speaking';
+                        recordButton.classList.remove('recording');
+                        break;
+                    case 'ready':
+                        buttonText.innerHTML = '🎤<br>Record';
+                        recordButton.classList.remove('recording');
+                        break;
+                    default:
+                        buttonText.innerHTML = '🎤<br>Record';
+                        recordButton.classList.remove('recording');
+                        break;
+                }
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            const connectionIndicator = document.createElement('div');
+            connectionIndicator.className = 'connection-status';
+            connectionIndicator.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 1000;
+                transition: all 0.3s ease;
+            `;
+
+            // Remove existing status indicator
+            const existing = document.querySelector('.connection-status');
+            if (existing) {
+                existing.remove();
+            }
+
+            switch(status) {
+                case 'connected':
+                    connectionIndicator.innerHTML = '🟢 Connected';
+                    connectionIndicator.style.backgroundColor = '#d4edda';
+                    connectionIndicator.style.color = '#155724';
+                    break;
+                case 'disconnected':
+                    connectionIndicator.innerHTML = '🔴 Disconnected';
+                    connectionIndicator.style.backgroundColor = '#f8d7da';
+                    connectionIndicator.style.color = '#721c24';
+                    break;
+                case 'connecting':
+                    connectionIndicator.innerHTML = '🟡 Connecting...';
+                    connectionIndicator.style.backgroundColor = '#fff3cd';
+                    connectionIndicator.style.color = '#856404';
+                    break;
+            }
+
+            document.body.appendChild(connectionIndicator);
+
+            // Auto-hide after 3 seconds if connected
+            if (status === 'connected') {
+                setTimeout(() => {
+                    if (connectionIndicator.parentNode) {
+                        connectionIndicator.style.opacity = '0.3';
+                    }
+                }, 3000);
+            }
+        }
+
+        function resetToTopicSelection() {
+            if (topicSelection && voiceControls && spacebarHint) {
+                topicSelection.style.display = 'block';
+                voiceControls.style.display = 'none';
+                spacebarHint.style.display = 'none';
+                currentTopic = null;
+                conversationActive = false;
+                setCharacterState('');
             }
         }
 
@@ -480,24 +764,52 @@
         }
 
         function startRecording() {
-            if (mediaRecorder && mediaRecorder.state === 'inactive') {
-                isRecording = true;
-                mediaRecorder.start();
-                recordButton.classList.add('recording');
-                buttonText.innerHTML = '🔴<br>Stop';
-                setCharacterState('listening');
-                addStatusMessage('system', 'Listening... Speak now!');
+            if (!isConnected) {
+                addStatusMessage('system', '❌ Not connected to server. Please wait for connection.');
+                return;
+            }
+
+            if (conversationActive && !isRecording) {
+                // ElevenLabs real-time streaming
+                if (mediaRecorder && mediaRecorder.state === 'inactive') {
+                    isRecording = true;
+                    // Start recording with smaller time slices for real-time streaming
+                    mediaRecorder.start(100); // 100ms chunks
+                    setCharacterState('listening');
+                    addStatusMessage('system', '🎙️ Listening... Speak to Nani!');
+                }
+            } else if (!conversationActive && !isRecording) {
+                // Sarvam batch processing
+                if (mediaRecorder && mediaRecorder.state === 'inactive') {
+                    isRecording = true;
+                    audioChunks = []; // Reset chunks
+                    mediaRecorder.start();
+                    setCharacterState('listening');
+                    addStatusMessage('system', '🎙️ Listening... Speak now!');
+                }
             }
         }
 
         function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
+            if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') {
                 isRecording = false;
                 mediaRecorder.stop();
-                recordButton.classList.remove('recording');
-                buttonText.innerHTML = '⏳<br>Processing';
-                setCharacterState('');
-                addStatusMessage('system', 'Processing your voice...');
+
+                if (conversationActive) {
+                    // ElevenLabs - immediate processing
+                    setCharacterState('ready');
+                    addStatusMessage('system', '🔄 Processing your voice...');
+                } else {
+                    // Sarvam - batch processing
+                    setCharacterState('');
+                    addStatusMessage('system', '⏳ Processing your voice...');
+                }
+            }
+        }
+
+        function streamAudioChunk(base64Audio) {
+            if (socket && isConnected && conversationActive) {
+                socket.emit('audio_chunk', { audio: base64Audio });
             }
         }
 
@@ -575,19 +887,7 @@
             });
         }
 
-        // Spacebar event listener
-        document.addEventListener('keydown', (event) => {
-            if (event.code === 'Space') {
-                event.preventDefault();
-                if (!isRecording) {
-                    startRecording();
-                } else {
-                    stopRecording();
-                }
-            }
-        });
-
-                // Topic selection event listeners
+        // Topic selection event listeners
         function setupTopicListeners() {
             console.log('Setting up topic button listeners');
             const topicButtons = document.querySelectorAll('.topic-button');
@@ -604,10 +904,10 @@
         }
 
         function setTopic(topic) {
-            console.log('setTopic called with topic:', topic);
+            console.log('🎯 Setting topic:', topic);
             currentTopic = topic;
 
-            // Send topic to server
+            // First, set the topic via HTTP (works for both integrations)
             fetch('/set_topic', {
                 method: 'POST',
                 headers: {
@@ -617,23 +917,50 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Topic response received:', data);
-                if (data.success) {
-                    // Hide topic selection and show voice controls
-                    console.log('Hiding topic selection, showing voice controls');
-                    topicSelection.style.display = 'none';
-                    voiceControls.style.display = 'block';
-                    spacebarHint.style.display = 'block';
+                console.log('📝 Topic response received:', data);
 
-                    addStatusMessage('system', `Topic set to: ${topic}. Nani is ready to teach you! Start by saying hello!`);
+                if (data.success) {
+                    useElevenLabs = data.using_elevenlabs || false;
+
+                    if (useElevenLabs) {
+                        // Start ElevenLabs conversation via WebSocket
+                        console.log('🚀 Starting ElevenLabs conversation...');
+                        if (socket && isConnected) {
+                            socket.emit('start_conversation', { topic: topic });
+                        } else {
+                            addStatusMessage('system', '❌ Not connected to server. Please refresh and try again.');
+                            return;
+                        }
+                    } else {
+                        // Traditional Sarvam flow
+                        showVoiceControls(topic);
+                    }
                 } else {
-                    addStatusMessage('system', 'Error setting topic: ' + data.error);
+                    addStatusMessage('system', '❌ Error setting topic: ' + data.error);
                 }
             })
             .catch(error => {
-                addStatusMessage('system', 'Error setting topic: ' + error.message);
+                addStatusMessage('system', '❌ Error setting topic: ' + error.message);
                 console.error('Error:', error);
             });
+        }
+
+        function showVoiceControls(topic) {
+            // Hide topic selection and show voice controls
+            if (topicSelection && voiceControls && spacebarHint) {
+                topicSelection.style.display = 'none';
+                voiceControls.style.display = 'block';
+                spacebarHint.style.display = 'block';
+
+                const integrationName = useElevenLabs ? 'ElevenLabs' : 'Sarvam';
+                addStatusMessage('system', `📚 Topic set to: ${topic}. Using ${integrationName} integration. ${useElevenLabs ? 'Nani is ready for real-time conversation!' : 'Start by saying hello!'}`);
+
+                if (useElevenLabs) {
+                    setCharacterState('ready');
+                } else {
+                    setCharacterState('');
+                }
+            }
         }
 
 
