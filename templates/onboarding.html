@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Your AI Cultural Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #fafbfc;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #1a1a1a;
+            padding: 1rem 1rem 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            overflow: hidden;
+            border-radius: 4rem 4rem 4rem 4rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.775rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            border: none;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.375rem;
+            opacity: 0.95;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .header .description {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            max-width: 550px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .header-features {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .header-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .header-feature-icon {
+            font-size: 1.2rem;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .progress-bar {
+            background: #f3f4f6;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 3rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .form-section {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .language-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .language-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .language-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .language-card.selected {
+            border-color: #6366f1;
+            background: #f0f9ff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .language-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #6366f1;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .language-flag {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .language-name {
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .voice-upload {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: #f9fafb;
+        }
+
+        .voice-upload:hover {
+            border-color: #6366f1;
+            background: #f0f9ff;
+        }
+
+        .voice-upload.dragover {
+            border-color: #6366f1;
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #6b7280;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .record-button {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 1rem auto;
+            display: block;
+        }
+
+        .record-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .record-button.recording {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            animation: pulse 2s infinite;
+        }
+
+        .audio-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .cultural-tips {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .cultural-tips h4 {
+            color: #92400e;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .tip-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+
+        .submit-section {
+            background: #f9fafb;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 200px;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+        }
+
+        .submit-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .field-description {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 3rem 1rem 2rem;
+            }
+
+            .header h1 {
+                font-size: 2.25rem;
+            }
+
+            .header .subtitle {
+                font-size: 1.125rem;
+            }
+
+            .header .description {
+                font-size: 1rem;
+            }
+
+            .header-features {
+                gap: 1rem;
+                margin-top: 1.5rem;
+            }
+
+            .header-feature {
+                font-size: 0.875rem;
+            }
+
+            .content {
+                padding: 2rem 1rem;
+            }
+
+            .language-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-badge">
+                    <span>✨</span>
+                    <span>AI Cultural Guide Setup</span>
+                </div>
+                <h1>Bring Home to Your Children</h1>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <form id="onboardingForm">
+                <!-- Language Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">🗣️</div>
+                        <h2 class="section-title">Primary Language</h2>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Which language should your AI guide primarily use?</label>
+                        <div class="language-grid" id="languageGrid">
+                            <div class="language-card" data-language="hindi">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Hindi</div>
+                            </div>
+                            <div class="language-card" data-language="gujarati">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Gujarati</div>
+                            </div>
+                            <div class="language-card" data-language="bengali">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Bengali</div>
+                            </div>
+                            <div class="language-card" data-language="tamil">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Tamil</div>
+                            </div>
+                            <div class="language-card" data-language="punjabi">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Punjabi</div>
+                            </div>
+                            <div class="language-card" data-language="marathi">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Marathi</div>
+                            </div>
+                            <div class="language-card" data-language="telugu">
+                                <div class="language-flag">🇮🇳</div>
+                                <div class="language-name">Telugu</div>
+                            </div>
+                            <div class="language-card" data-language="other">
+                                <div class="language-flag">🌍</div>
+                                <div class="language-name">Other</div>
+                            </div>
+                        </div>
+                        <input type="text" id="otherLanguage" class="form-input"
+                            placeholder="Please specify the language" style="display: none; margin-top: 1rem;">
+                    </div>
+                </div>
+
+                <!-- Cultural Background -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">🕉️</div>
+                        <h2 class="section-title">Cultural Background</h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="religion" class="form-label">Religious/Spiritual Tradition</label>
+                        <select id="religion" class="form-input">
+                            <option value="">Select if you'd like to include...</option>
+                            <option value="hindu">Hindu</option>
+                            <option value="sikh">Sikh</option>
+                            <option value="muslim">Muslim</option>
+                            <option value="christian">Christian</option>
+                            <option value="jain">Jain</option>
+                            <option value="buddhist">Buddhist</option>
+                            <option value="parsi">Parsi</option>
+                            <option value="secular">Secular/Cultural only</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="field-description">Optional - helps personalize cultural stories and values</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="region" class="form-label">Region/State of Origin</label>
+                        <input type="text" id="region" class="form-input"
+                            placeholder="e.g., Punjab, Gujarat, West Bengal, Tamil Nadu...">
+                        <div class="field-description">Helps include regional traditions and stories</div>
+                    </div>
+                </div>
+
+                <!-- Cultural Values -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">📚</div>
+                        <h2 class="section-title">Cultural Values & Stories</h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="culturalContext" class="form-label">What values and traditions are important to your
+                            family?</label>
+                        <textarea id="culturalContext" class="form-input form-textarea" placeholder="Share your family's values, traditions, and stories that you'd like your AI guide to emphasize...
+
+For example:
+• Stories from religious texts (Ramayana, Quran, Guru Granth Sahib)
+• Festival celebrations and their meanings
+• Importance of respecting elders and family values
+• Traditional recipes and food customs
+• Regional folk tales and songs
+• Values like kindness, honesty, and service to others
+• Memories of your own grandparents"></textarea>
+                    </div>
+
+                    <div class="cultural-tips">
+                        <h4>💡 Ideas to Include</h4>
+                        <div class="tips-grid">
+                            <div class="tip-item">Traditional festivals and their significance</div>
+                            <div class="tip-item">Moral stories from ancient texts</div>
+                            <div class="tip-item">Regional songs and folk tales</div>
+                            <div class="tip-item">Family customs and traditions</div>
+                            <div class="tip-item">Traditional games and activities</div>
+                            <div class="tip-item">Respect for nature and animals</div>
+                            <div class="tip-item">Stories of courage and kindness</div>
+                            <div class="tip-item">Importance of community and family</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Personalization -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">🎤</div>
+                        <h2 class="section-title">Voice Personalization</h2>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Voice Sample (Optional)</label>
+                        <div class="voice-upload" id="voiceUpload">
+                            <div class="upload-icon">🎵</div>
+                            <div class="upload-text">Upload or record a voice sample</div>
+                            <div class="upload-hint">Record yourself speaking lovingly to your child (30-60 seconds
+                                recommended)</div>
+                        </div>
+                        <button type="button" class="record-button" id="recordButton">
+                            🎤 Record Voice Sample
+                        </button>
+                        <input type="file" id="voiceFile" accept="audio/*" style="display: none;">
+                        <div id="audioPreview" class="audio-preview" style="display: none;"></div>
+                        <div class="field-description">This helps make the AI voice sound more familiar to your child
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Child Information -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">👶</div>
+                        <h2 class="section-title">About Your Child</h2>
+                    </div>
+                    <div class="form-group">
+                        <label for="childAge" class="form-label">Child's Age Range</label>
+                        <select id="childAge" class="form-input">
+                            <option value="">Select age range</option>
+                            <option value="2-4">2-4 years</option>
+                            <option value="5-7">5-7 years</option>
+                            <option value="8-10">8-10 years</option>
+                            <option value="11-13">11-13 years</option>
+                            <option value="14+">14+ years</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="childName" class="form-label">Child's Name</label>
+                        <input type="text" id="childName" class="form-input"
+                            placeholder="So your AI guide can address them personally">
+                        <div class="field-description">Optional - helps create a more personal connection</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="childInterests" class="form-label">Child's Interests & Hobbies</label>
+                        <input type="text" id="childInterests" class="form-input"
+                            placeholder="e.g., animals, space, music, drawing, sports...">
+                        <div class="field-description">Helps tailor stories and activities to their preferences</div>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-button" id="submitButton">
+                        ✨ Create My AI Cultural Guide
+                    </button>
+                    <div class="field-description" style="margin-top: 1rem;">
+                        Your personalized AI guide will be ready in just a moment!
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedLanguage = '';
+        let recordedAudio = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let currentStep = 0;
+        const totalSteps = 5;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeLanguageSelection();
+            initializeVoiceUpload();
+            initializeFormSubmission();
+            updateProgress();
+        });
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function initializeLanguageSelection() {
+            const languageCards = document.querySelectorAll('.language-card');
+            const otherLanguageInput = document.getElementById('otherLanguage');
+
+            languageCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    languageCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedLanguage = this.dataset.language;
+
+                    if (selectedLanguage === 'other') {
+                        otherLanguageInput.style.display = 'block';
+                        otherLanguageInput.focus();
+                    } else {
+                        otherLanguageInput.style.display = 'none';
+                    }
+
+                    currentStep = 1;
+                    updateProgress();
+                });
+            });
+        }
+
+        function initializeVoiceUpload() {
+            const uploadArea = document.getElementById('voiceUpload');
+            const recordButton = document.getElementById('recordButton');
+            const fileInput = document.getElementById('voiceFile');
+
+            uploadArea.addEventListener('click', function () {
+                fileInput.click();
+            });
+
+            uploadArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].type.startsWith('audio/')) {
+                    handleAudioFile(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    handleAudioFile(this.files[0]);
+                }
+            });
+
+            recordButton.addEventListener('click', function () {
+                if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
+            });
+        }
+
+        function handleAudioFile(file) {
+            const audioPreview = document.getElementById('audioPreview');
+            const audio = document.createElement('audio');
+            audio.src = URL.createObjectURL(file);
+            audio.controls = true;
+            audio.style.width = '100%';
+
+            audioPreview.innerHTML = '<p><strong>Audio uploaded:</strong> ' + file.name + '</p>';
+            audioPreview.appendChild(audio);
+            audioPreview.style.display = 'block';
+
+            recordedAudio = file;
+            currentStep = Math.max(currentStep, 4);
+            updateProgress();
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = function (event) {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = function () {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    recordedAudio = audioBlob;
+
+                    const audio = document.createElement('audio');
+                    audio.src = URL.createObjectURL(audioBlob);
+                    audio.controls = true;
+                    audio.style.width = '100%';
+
+                    const audioPreview = document.getElementById('audioPreview');
+                    audioPreview.innerHTML = '<p><strong>Voice recorded successfully!</strong></p>';
+                    audioPreview.appendChild(audio);
+                    audioPreview.style.display = 'block';
+
+                    currentStep = Math.max(currentStep, 4);
+                    updateProgress();
+                };
+
+                mediaRecorder.start();
+                document.getElementById('recordButton').textContent = '⏹️ Stop Recording';
+                document.getElementById('recordButton').classList.add('recording');
+            } catch (error) {
+                alert('Error accessing microphone: ' + error.message);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                document.getElementById('recordButton').textContent = '🎤 Record Voice Sample';
+                document.getElementById('recordButton').classList.remove('recording');
+            }
+        }
+
+        function initializeFormSubmission() {
+            const form = document.getElementById('onboardingForm');
+
+            // Track form completion
+            const inputs = ['religion', 'region', 'culturalContext', 'childAge', 'childName', 'childInterests'];
+            inputs.forEach(inputId => {
+                const element = document.getElementById(inputId);
+                if (element) {
+                    element.addEventListener('input', function () {
+                        if (this.value.trim()) {
+                            currentStep = Math.max(currentStep, inputs.indexOf(inputId) + 2);
+                            updateProgress();
+                        }
+                    });
+                }
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = {
+                    language: selectedLanguage === 'other' ? document.getElementById('otherLanguage').value : selectedLanguage,
+                    religion: document.getElementById('religion').value,
+                    region: document.getElementById('region').value,
+                    culturalContext: document.getElementById('culturalContext').value,
+                    childAge: document.getElementById('childAge').value,
+                    childName: document.getElementById('childName').value,
+                    childInterests: document.getElementById('childInterests').value,
+                    hasVoiceSample: recordedAudio !== null
+                };
+
+                if (!formData.language) {
+                    alert('Please select a language for your AI cultural guide');
+                    return;
+                }
+
+                if (!formData.culturalContext.trim()) {
+                    alert('Please share some cultural values or family traditions');
+                    return;
+                }
+
+                currentStep = totalSteps;
+                updateProgress();
+
+                console.log('Onboarding data:', formData);
+
+                document.getElementById('submitButton').textContent = '✨ Creating Your AI Guide... ✨';
+                document.getElementById('submitButton').disabled = true;
+
+                setTimeout(() => {
+                    alert('🎉 Your AI Cultural Guide is ready! Redirecting to the main app...');
+                    window.location.href = '/';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>

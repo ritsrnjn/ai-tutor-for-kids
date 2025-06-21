@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Learning Page</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Floating background elements */
+        .bg-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            width: 60px;
+            height: 60px;
+            background: #4ecdc4;
+            border-radius: 10px;
+            animation-delay: 1s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 15%;
+            width: 100px;
+            height: 100px;
+            background: #45b7d1;
+            border-radius: 50%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(4) {
+            bottom: 10%;
+            right: 20%;
+            width: 70px;
+            height: 70px;
+            background: #f9ca24;
+            border-radius: 15px;
+            animation-delay: 3s;
+        }
+
+        .shape:nth-child(5) {
+            top: 50%;
+            left: 5%;
+            width: 50px;
+            height: 50px;
+            background: #f0932b;
+            border-radius: 50%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(6) {
+            top: 30%;
+            right: 30%;
+            width: 90px;
+            height: 90px;
+            background: #eb4d4b;
+            border-radius: 20px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        /* Main container */
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            width: 90%;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Image container */
+        .image-container {
+            position: relative;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .main-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 5px solid #ff6b6b;
+            animation: bounce 2s ease-in-out infinite;
+            transition: transform 0.3s ease;
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-image:hover {
+            transform: scale(1.1) rotate(5deg);
+            border-color: #4ecdc4;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-15px);
+            }
+
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Sparkle effects around image */
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f9ca24;
+            border-radius: 50%;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        .sparkle:nth-child(1) {
+            top: -10px;
+            left: 20px;
+            animation-delay: 0s;
+        }
+
+        .sparkle:nth-child(2) {
+            top: 30px;
+            right: -10px;
+            animation-delay: 0.3s;
+        }
+
+        .sparkle:nth-child(3) {
+            bottom: -10px;
+            left: 50px;
+            animation-delay: 0.6s;
+        }
+
+        .sparkle:nth-child(4) {
+            top: 80px;
+            left: -10px;
+            animation-delay: 0.9s;
+        }
+
+        @keyframes sparkle {
+
+            0%,
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Word display */
+        .word-display {
+            font-family: 'Fredoka One', cursive;
+            font-size: 48px;
+            color: #2c3e50;
+            margin: 20px 0;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+            animation: colorChange 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .word-display:hover {
+            transform: scale(1.1);
+            animation-play-state: paused;
+        }
+
+        @keyframes colorChange {
+            0% {
+                color: #e74c3c;
+            }
+
+            25% {
+                color: #3498db;
+            }
+
+            50% {
+                color: #2ecc71;
+            }
+
+            75% {
+                color: #f39c12;
+            }
+
+            100% {
+                color: #e74c3c;
+            }
+        }
+
+        /* Action buttons */
+        .button-container {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .fun-button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8787);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .fun-button:nth-child(2) {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+            animation-delay: 0.5s;
+        }
+
+        .fun-button:nth-child(3) {
+            background: linear-gradient(45deg, #45b7d1, #96c93d);
+            box-shadow: 0 5px 15px rgba(69, 183, 209, 0.4);
+            animation-delay: 1s;
+        }
+
+        .fun-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation-play-state: paused;
+        }
+
+        .fun-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 5px 25px rgba(255, 107, 107, 0.6);
+            }
+        }
+
+        /* Fun decorative elements */
+        .star {
+            position: absolute;
+            font-size: 20px;
+            color: #f9ca24;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        .star:nth-child(1) {
+            top: 10px;
+            left: 50px;
+            animation-delay: 0s;
+        }
+
+        .star:nth-child(2) {
+            top: 20px;
+            right: 30px;
+            animation-delay: 0.7s;
+        }
+
+        .star:nth-child(3) {
+            bottom: 30px;
+            left: 40px;
+            animation-delay: 1.4s;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            border-radius: 4px;
+            animation: progress 3s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% {
+                width: 0%;
+            }
+
+            50% {
+                width: 75%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .main-image {
+                width: 150px;
+                height: 150px;
+                font-size: 40px;
+            }
+
+            .word-display {
+                font-size: 36px;
+            }
+
+            .fun-button {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background floating shapes -->
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Main content container -->
+    <div class="container">
+        <!-- Decorative stars -->
+        <div class="star">⭐</div>
+        <div class="star">✨</div>
+        <div class="star">🌟</div>
+
+        <!-- Image section -->
+        <div class="image-container">
+            <div class="main-image">🦋</div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+            <div class="sparkle"></div>
+        </div>
+
+        <!-- Word display -->
+        <div class="word-display" onclick="playWordSound()">BUTTERFLY</div>
+
+        <!-- Progress indicator -->
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="button-container">
+            <button class="fun-button" onclick="nextWord()">Next Word 🎯</button>
+            <button class="fun-button" onclick="playAgain()">Play Again 🔄</button>
+            <button class="fun-button" onclick="hearSound()">Hear Sound 🔊</button>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive functionality
+        function playWordSound() {
+            const wordElement = document.querySelector('.word-display');
+            wordElement.style.transform = 'scale(1.2)';
+            wordElement.style.color = '#e74c3c';
+
+            setTimeout(() => {
+                wordElement.style.transform = 'scale(1)';
+            }, 200);
+
+            // Add some fun effects
+            createConfetti();
+        }
+
+        function nextWord() {
+            const words = ['BUTTERFLY', 'RAINBOW', 'SUNSHINE', 'FLOWER', 'STAR'];
+            const emojis = ['🦋', '🌈', '☀️', '🌸', '⭐'];
+            const currentWord = document.querySelector('.word-display').textContent;
+            const currentIndex = words.indexOf(currentWord);
+            const nextIndex = (currentIndex + 1) % words.length;
+
+            document.querySelector('.word-display').textContent = words[nextIndex];
+            document.querySelector('.main-image').textContent = emojis[nextIndex];
+
+            // Add bounce animation to image
+            const image = document.querySelector('.main-image');
+            image.style.animation = 'none';
+            setTimeout(() => {
+                image.style.animation = 'bounce 2s ease-in-out infinite';
+            }, 10);
+        }
+
+        function playAgain() {
+            // Reset to first word
+            document.querySelector('.word-display').textContent = 'BUTTERFLY';
+            document.querySelector('.main-image').textContent = '🦋';
+            createConfetti();
+        }
+
+        function hearSound() {
+            // Visual feedback for sound
+            const container = document.querySelector('.container');
+            container.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                container.style.transform = 'scale(1)';
+            }, 200);
+
+            // Add sound wave effect
+            createSoundWaves();
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'];
+            for (let i = 0; i < 15; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'absolute';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-10px';
+                confetti.style.borderRadius = '50%';
+                confetti.style.zIndex = '1000';
+                confetti.style.pointerEvents = 'none';
+
+                document.body.appendChild(confetti);
+
+                const animation = confetti.animate([
+                    {
+                        transform: `translateY(0) rotate(0deg)`,
+                        opacity: 1
+                    },
+                    {
+                        transform: `translateY(${window.innerHeight + 20}px) rotate(720deg)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: Math.random() * 2000 + 1000,
+                    easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
+                });
+
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        function createSoundWaves() {
+            const image = document.querySelector('.main-image');
+            for (let i = 0; i < 3; i++) {
+                const wave = document.createElement('div');
+                wave.style.position = 'absolute';
+                wave.style.border = '3px solid #4ecdc4';
+                wave.style.borderRadius = '50%';
+                wave.style.width = '100px';
+                wave.style.height = '100px';
+                wave.style.left = '50%';
+                wave.style.top = '50%';
+                wave.style.transform = 'translate(-50%, -50%)';
+                wave.style.pointerEvents = 'none';
+                wave.style.zIndex = '5';
+
+                document.querySelector('.image-container').appendChild(wave);
+
+                const animation = wave.animate([
+                    {
+                        width: '100px',
+                        height: '100px',
+                        opacity: 0.8
+                    },
+                    {
+                        width: '300px',
+                        height: '300px',
+                        opacity: 0
+                    }
+                ], {
+                    duration: 1500,
+                    delay: i * 200,
+                    easing: 'ease-out'
+                });
+
+                animation.onfinish = () => wave.remove();
+            }
+        }
+
+        // Add some automatic sparkle effects
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                const sparkles = document.querySelectorAll('.sparkle');
+                const randomSparkle = sparkles[Math.floor(Math.random() * sparkles.length)];
+                randomSparkle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
