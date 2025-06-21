@@ -12,3 +12,7 @@ python-socketio
 
 # Testing dependencies
 requests
+
+# Image generation dependencies
+openai>=0.28.0
+Pillow>=8.0.0

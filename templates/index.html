@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Voice Assistant</title>
+    <title>Nani - Your Hindi Coach</title>
     <style>
         * {
             margin: 0;
@@ -14,334 +13,74 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            /* background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); */
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .main-container {
             display: flex;
-            justify-content: center;
+            min-height: 100vh;
             align-items: center;
+            justify-content: space-between;
+            padding: 2rem;
+            gap: 2rem;
+        }
+
+        /* Left Side - ElevenLabs ConvAI Widget */
+        .left-widget {
+            flex: 1;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+        }
+
+        /* Style the ElevenLabs widget container */
+        elevenlabs-convai {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            border-radius: 20px;
             overflow: hidden;
         }
 
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 3rem;
-            border-radius: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            max-width: 500px;
-            width: 90%;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 2.2rem;
-            font-weight: 300;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        /* AI Character */
-        .ai-character {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 2rem;
-            position: relative;
-        }
-
-        .character-face {
-            width: 180px;
-            height: 180px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            position: relative;
-            margin: 0 auto;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        }
-
-        /* Eyes */
-        .eye {
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 50px;
-        }
-
-        .eye.left {
-            left: 45px;
-        }
-
-        .eye.right {
-            right: 45px;
-        }
-
-        .pupil {
-            width: 8px;
-            height: 8px;
-            background: #333;
-            border-radius: 50%;
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            transition: all 0.3s ease;
-        }
-
-        /* Mouth */
-        .mouth {
-            width: 40px;
-            height: 20px;
-            background: #ff6b6b;
-            border-radius: 0 0 40px 40px;
-            position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: all 0.3s ease;
-        }
-
-        /* Listening state */
-        .listening .character-face {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            animation: listening-pulse 2s infinite;
-        }
-
-        .listening .eye {
-            animation: blink 3s infinite;
-        }
-
-        .listening .mouth {
-            width: 20px;
-            height: 10px;
-            background: #333;
-            border-radius: 50%;
-        }
-
-        /* Talking state */
-        .talking .character-face {
-            background: linear-gradient(135deg, #fa709a, #fee140);
-            animation: talking-bounce 0.5s infinite alternate;
-        }
-
-        .talking .mouth {
-            animation: talk 0.3s infinite alternate;
-        }
-
-        .talking .pupil {
-            animation: look-around 2s infinite;
-        }
-
-        /* Sound waves for listening */
-        .sound-waves {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .wave {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 2px solid rgba(79, 172, 254, 0.6);
-            border-radius: 50%;
-            animation: wave-expand 2s infinite;
-        }
-
-        .wave:nth-child(1) { animation-delay: 0s; }
-        .wave:nth-child(2) { animation-delay: 0.5s; }
-        .wave:nth-child(3) { animation-delay: 1s; }
-
-        /* Topic Selection */
-        .topic-selection {
-            margin: 2rem 0;
-        }
-
-        .topic-selection h3 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .topic-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-bottom: 1rem;
-        }
-
-        .topic-button {
-            padding: 15px 10px;
-            border: none;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .topic-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .topic-button:active {
-            transform: scale(0.95);
-        }
-
-        .topic-hint {
-            color: #666;
-            font-size: 0.95rem;
-            font-style: italic;
-        }
-
-        /* Control buttons */
-        .controls {
-            margin: 2rem 0;
-        }
-
-        .record-button {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 0 10px;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
-
-        .record-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
-        }
-
-        .record-button.recording {
-            background: linear-gradient(135deg, #ff4757, #ff3838);
-            animation: record-pulse 1s infinite;
-        }
-
-        .spacebar-hint {
-            margin-top: 1rem;
-            color: #888;
-            font-size: 0.9rem;
-            font-style: italic;
-        }
-
-        /* Status area */
-        .status {
-            margin-top: 2rem;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .status-item {
-            background: #f8f9fa;
-            margin: 0.5rem 0;
+        /* Right Side - Better alignment */
+        .right-side {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
             padding: 1rem;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
+        }
+
+        /* Connection status - Move to bottom left */
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 16px;
+            border-radius: 25px;
             font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .status-item strong {
-            color: #333;
-        }
-
-        .status-item.user {
-            border-left-color: #4facfe;
-        }
-
-        .status-item.ai {
-            border-left-color: #fa709a;
-        }
-
-        .status-item.system {
-            border-left-color: #51cf66;
+            font-weight: bold;
+            z-index: 999;
+            transition: all 0.3s ease;
+            animation: slideInFromLeft 0.3s ease;
         }
 
         /* Animations */
-        @keyframes listening-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
 
-        @keyframes talking-bounce {
-            0% { transform: translateX(-50%) scale(1); }
-            100% { transform: translateX(-50%) scale(1.02); }
-        }
-
-        @keyframes blink {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95% { transform: scaleY(0.1); }
-        }
-
-        @keyframes talk {
-            0% { height: 15px; width: 35px; }
-            100% { height: 25px; width: 45px; }
-        }
-
-        @keyframes look-around {
-            0%, 100% { transform: translate(6px, 6px); }
-            25% { transform: translate(4px, 6px); }
-            75% { transform: translate(8px, 6px); }
-        }
-
-        @keyframes wave-expand {
-            0% {
-                width: 180px;
-                height: 180px;
-                opacity: 0.8;
-            }
-            100% {
-                width: 300px;
-                height: 300px;
-                opacity: 0;
-            }
-        }
-
-        @keyframes record-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* New states for WebSocket integration */
-        .character-face.ready {
-            background: linear-gradient(135deg, #4CAF50, #81C784);
-            box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);
-        }
-
-        .character-face.connected {
-            background: linear-gradient(135deg, #2196F3, #64B5F6);
-            box-shadow: 0 10px 30px rgba(33, 150, 243, 0.4);
-        }
-
-        /* Connection status improvements */
-        .connection-status {
-            animation: slideInFromRight 0.3s ease;
-        }
-
-        @keyframes slideInFromRight {
+        @keyframes slideInFromLeft {
             from {
-                transform: translateX(100%);
+                transform: translateX(-100%);
                 opacity: 0;
             }
             to {
@@ -350,74 +89,71 @@
             }
         }
 
-        /* Enhanced status messages */
-        .status-item.websocket {
-            border-left-color: #FF9800;
+        /* Mobile responsiveness */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .left-widget {
+                max-width: 100%;
+                min-height: 300px;
+            }
+
+            .right-side {
+                max-width: 100%;
+                min-height: 400px;
+            }
+
+            /* ElevenLabs widget responsive adjustments */
+            elevenlabs-convai {
+                min-height: 350px;
+            }
         }
 
-        .status-item.elevenlabs {
-            border-left-color: #9C27B0;
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 0.5rem;
+            }
+
+            .left-widget {
+                padding: 1.5rem;
+                min-height: 250px;
+            }
+
+            elevenlabs-convai {
+                min-height: 300px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Nani - Your Hindi Coach</h1>
-        <p class="subtitle">Learn Hindi through mythological stories</p>
-
-        <!-- AI Character -->
-        <div class="ai-character" id="aiCharacter">
-            <div class="character-face">
-                <div class="eye left">
-                    <div class="pupil"></div>
-                </div>
-                <div class="eye right">
-                    <div class="pupil"></div>
-                </div>
-                <div class="mouth"></div>
-
-                <!-- Sound waves for listening state -->
-                <div class="sound-waves" style="display: none;">
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                </div>
-            </div>
+    <div class="main-container">
+        <!-- Left Side - ElevenLabs ConvAI Widget -->
+        <div class="left-widget">
+            <!-- ElevenLabs ConvAI Embed -->
+            <elevenlabs-convai agent-id="agent_01jy9sz4gnew0vedv885xsrse1"></elevenlabs-convai>
         </div>
 
-                <!-- Topic Selection -->
-        <div class="topic-selection" id="topicSelection">
-            <h3>Choose a topic to learn:</h3>
-            <div class="topic-buttons">
-                <button class="topic-button" data-topic="animals">🦁 Animals</button>
-                <button class="topic-button" data-topic="birds">🦅 Birds</button>
-                <button class="topic-button" data-topic="nature">🌳 Nature</button>
-                <button class="topic-button" data-topic="colors">🌈 Colors</button>
-                <button class="topic-button" data-topic="family">👨‍👩‍👧‍👦 Family</button>
-                <button class="topic-button" data-topic="emotions">😊 Emotions</button>
-            </div>
-            <p class="topic-hint">Select a topic to start learning Hindi vocabulary with Nani!</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls" id="voiceControls" style="display: none;">
-            <button class="record-button" id="recordButton">
-                <span id="buttonText">🎤<br>Record</span>
-            </button>
-        </div>
-
-        <div class="spacebar-hint" id="spacebarHint" style="display: none;">Press SPACEBAR to start/stop recording</div>
-
-        <!-- Status -->
-        <div class="status" id="status">
-            <div class="status-item system">
-                <strong>Welcome:</strong> Choose a topic above to start learning Hindi vocabulary with Nani!
-            </div>
+        <!-- Right Side - Space for Image Widget -->
+        <div class="right-side">
+            <!-- Image display component will appear here -->
         </div>
     </div>
 
+    <!-- Connection Status Badge (moved to bottom left) -->
+    <div class="connection-status" id="connectionBadge">🔄 Connecting...</div>
+
+    <!-- ElevenLabs ConvAI Widget -->
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
     <!-- Socket.IO Client Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+
+    <!-- Image Display Component -->
+    <script src="{{ url_for('static', filename='js/image_display_component.js') }}"></script>
 
     <script>
         // WebSocket and audio streaming variables
@@ -428,13 +164,13 @@
         let currentTopic = null;
         let isConnected = false;
         let conversationActive = false;
-        let useElevenLabs = false; // Will be determined by server response
+        let useElevenLabs = false;
         let audioStream;
         let audioContext;
         let audioBuffer = [];
 
         // DOM elements
-        let recordButton, status, buttonText, aiCharacter, soundWaves, topicSelection, voiceControls, spacebarHint;
+        let status, aiCharacter, soundWaves, connectionBadge;
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -449,25 +185,19 @@
             // Setup audio recording
             initializeAudioRecording();
 
-            // Setup event listeners
-            setupEventListeners();
+            // Auto-start conversation for simplified flow
+            setTimeout(() => {
+                if (socket && isConnected) {
+                    socket.emit('start_conversation', { topic: 'general' });
+                }
+            }, 2000);
         });
 
         function initializeDOMElements() {
-            recordButton = document.getElementById('recordButton');
-            status = document.getElementById('status');
-            buttonText = document.getElementById('buttonText');
-            aiCharacter = document.getElementById('aiCharacter');
-            soundWaves = document.querySelector('.sound-waves');
-            topicSelection = document.getElementById('topicSelection');
-            voiceControls = document.getElementById('voiceControls');
-            spacebarHint = document.getElementById('spacebarHint');
+            // AI character replaced with ElevenLabs widget
+            connectionBadge = document.getElementById('connectionBadge');
 
-            console.log('📋 DOM elements initialized:', {
-                recordButton: !!recordButton,
-                topicSelection: !!topicSelection,
-                voiceControls: !!voiceControls
-            });
+            console.log('📋 DOM elements initialized');
         }
 
         function initializeWebSocket() {
@@ -503,7 +233,8 @@
                 conversationActive = data.success;
                 if (data.success) {
                     useElevenLabs = true;
-                    showVoiceControls(data.topic || currentTopic || 'general');
+                    addStatusMessage('system', '🎙️ Conversation started! Nani is listening...');
+                    setCharacterState('ready');
                 } else {
                     addStatusMessage('system', `❌ Failed to start conversation: ${data.error}`);
                 }
@@ -512,17 +243,39 @@
             socket.on('conversation_ended', (data) => {
                 console.log('🛑 Conversation ended:', data);
                 conversationActive = false;
-                addStatusMessage('system', '👋 Conversation ended. Choose a new topic to continue learning!');
+                addStatusMessage('system', '👋 Conversation ended. Restarting...');
                 setCharacterState('');
-                // Show topic selection again
-                resetToTopicSelection();
+                // Auto-restart conversation
+                setTimeout(() => {
+                    if (socket && isConnected) {
+                        socket.emit('start_conversation', { topic: 'general' });
+                    }
+                }, 3000);
             });
 
             socket.on('agent_response', (data) => {
                 console.log('🤖 Agent response:', data.response);
                 addStatusMessage('ai', data.response);
                 setCharacterState('talking');
-                // The audio will be handled by ElevenLabs directly
+
+                // call create_image api to get the image url and then pass it in imageDisplayComponent
+                fetch('/create_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ response: data.response })
+                })
+                .then(response => response.json())
+                .then(dataFromCreateImage => {
+                    console.log('🖼️ Image URL:', dataFromCreateImage.image_url);
+                    if (window.imageDisplayComponent) {
+                        window.imageDisplayComponent.displayImageForResponse(dataFromCreateImage, dataFromCreateImage.image_url);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error generating image:', error);
+                });
             });
 
             socket.on('user_transcript', (data) => {
@@ -537,7 +290,6 @@
 
             socket.on('latency_measurement', (data) => {
                 console.log('⚡ Latency:', data.latency + 'ms');
-                // Optional: show latency in UI for debugging
             });
 
             socket.on('session_ended', (data) => {
@@ -590,28 +342,13 @@
                             streamAudioChunk(base64Audio);
                         };
                         reader.readAsDataURL(event.data);
-                    } else if (event.data.size > 0) {
-                        // For Sarvam, collect chunks as before
-                        audioChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    if (!conversationActive && audioChunks.length > 0) {
-                        // Sarvam integration - send complete audio
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        audioChunks = [];
-
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const base64Audio = reader.result.split(',')[1];
-                            sendAudioToServer(base64Audio);
-                        };
-                        reader.readAsDataURL(audioBlob);
                     }
                 };
 
                 addStatusMessage('system', '🎤 Microphone access granted! Ready to chat.');
+
+                // Auto-start recording when conversation is active
+                startContinuousRecording();
             })
             .catch(err => {
                 addStatusMessage('system', '❌ Microphone access denied. Please allow microphone access to use the voice assistant.');
@@ -619,192 +356,53 @@
             });
         }
 
-        function setupEventListeners() {
-            console.log('🔧 Setting up event listeners...');
-
-            // Set up topic button listeners
-            setupTopicListeners();
-
-            // Set up record button listener
-            if (recordButton) {
-                recordButton.addEventListener('click', () => {
-                    if (!isRecording) {
-                        startRecording();
-                    } else {
-                        stopRecording();
-                    }
-                });
-            }
-
-            // Spacebar event listener
-            document.addEventListener('keydown', (event) => {
-                if (event.code === 'Space') {
-                    event.preventDefault();
-                    if (!isRecording) {
-                        startRecording();
-                    } else {
-                        stopRecording();
-                    }
+        function startContinuousRecording() {
+            // Start continuous recording when conversation becomes active
+            const checkAndRecord = () => {
+                if (conversationActive && !isRecording && mediaRecorder && mediaRecorder.state === 'inactive') {
+                    isRecording = true;
+                    mediaRecorder.start(100); // 100ms chunks for real-time streaming
+                    setCharacterState('listening');
                 }
-            });
+
+                // Check again in 1 second
+                setTimeout(checkAndRecord, 1000);
+            };
+
+            checkAndRecord();
         }
 
         function setCharacterState(state) {
-            aiCharacter.className = 'ai-character';
-            if (state) {
-                aiCharacter.classList.add(state);
-            }
-
-            // Update sound waves visibility
-            if (state === 'listening') {
-                soundWaves.style.display = 'block';
-            } else {
-                soundWaves.style.display = 'none';
-            }
-
-            // Update button text based on state
-            if (recordButton && buttonText) {
-                switch(state) {
-                    case 'listening':
-                        buttonText.innerHTML = '🔴<br>Stop';
-                        recordButton.classList.add('recording');
-                        break;
-                    case 'talking':
-                        buttonText.innerHTML = '🗣️<br>Speaking';
-                        recordButton.classList.remove('recording');
-                        break;
-                    case 'ready':
-                        buttonText.innerHTML = '🎤<br>Record';
-                        recordButton.classList.remove('recording');
-                        break;
-                    default:
-                        buttonText.innerHTML = '🎤<br>Record';
-                        recordButton.classList.remove('recording');
-                        break;
-                }
-            }
+            // Character state is now handled by ElevenLabs widget
+            console.log(`Character state: ${state}`);
         }
 
         function updateConnectionStatus(status) {
-            const connectionIndicator = document.createElement('div');
-            connectionIndicator.className = 'connection-status';
-            connectionIndicator.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                padding: 8px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: bold;
-                z-index: 1000;
-                transition: all 0.3s ease;
-            `;
-
-            // Remove existing status indicator
-            const existing = document.querySelector('.connection-status');
-            if (existing) {
-                existing.remove();
-            }
-
             switch(status) {
                 case 'connected':
-                    connectionIndicator.innerHTML = '🟢 Connected';
-                    connectionIndicator.style.backgroundColor = '#d4edda';
-                    connectionIndicator.style.color = '#155724';
+                    connectionBadge.innerHTML = '🟢 Connected';
+                    connectionBadge.style.background = 'linear-gradient(135deg, #4CAF50, #81C784)';
                     break;
                 case 'disconnected':
-                    connectionIndicator.innerHTML = '🔴 Disconnected';
-                    connectionIndicator.style.backgroundColor = '#f8d7da';
-                    connectionIndicator.style.color = '#721c24';
+                    connectionBadge.innerHTML = '🔴 Disconnected';
+                    connectionBadge.style.background = 'linear-gradient(135deg, #F44336, #E57373)';
                     break;
                 case 'connecting':
-                    connectionIndicator.innerHTML = '🟡 Connecting...';
-                    connectionIndicator.style.backgroundColor = '#fff3cd';
-                    connectionIndicator.style.color = '#856404';
+                    connectionBadge.innerHTML = '🟡 Connecting...';
+                    connectionBadge.style.background = 'linear-gradient(135deg, #FF9800, #FFB74D)';
                     break;
-            }
-
-            document.body.appendChild(connectionIndicator);
-
-            // Auto-hide after 3 seconds if connected
-            if (status === 'connected') {
-                setTimeout(() => {
-                    if (connectionIndicator.parentNode) {
-                        connectionIndicator.style.opacity = '0.3';
-                    }
-                }, 3000);
-            }
-        }
-
-        function resetToTopicSelection() {
-            if (topicSelection && voiceControls && spacebarHint) {
-                topicSelection.style.display = 'block';
-                voiceControls.style.display = 'none';
-                spacebarHint.style.display = 'none';
-                currentTopic = null;
-                conversationActive = false;
-                setCharacterState('');
             }
         }
 
         function addStatusMessage(type, message) {
-            const statusItem = document.createElement('div');
-            statusItem.className = `status-item ${type}`;
-
+            // Status display area removed, just log to console
             let label = '';
             switch(type) {
-                case 'user': label = 'You said:'; break;
-                case 'ai': label = 'AI Response:'; break;
-                case 'system': label = 'Status:'; break;
+                case 'user': label = 'You:'; break;
+                case 'ai': label = 'Nani:'; break;
+                case 'system': label = 'System:'; break;
             }
-
-            statusItem.innerHTML = `<strong>${label}</strong> ${message}`;
-            status.appendChild(statusItem);
-            status.scrollTop = status.scrollHeight;
-        }
-
-        function startRecording() {
-            if (!isConnected) {
-                addStatusMessage('system', '❌ Not connected to server. Please wait for connection.');
-                return;
-            }
-
-            if (conversationActive && !isRecording) {
-                // ElevenLabs real-time streaming
-                if (mediaRecorder && mediaRecorder.state === 'inactive') {
-                    isRecording = true;
-                    // Start recording with smaller time slices for real-time streaming
-                    mediaRecorder.start(100); // 100ms chunks
-                    setCharacterState('listening');
-                    addStatusMessage('system', '🎙️ Listening... Speak to Nani!');
-                }
-            } else if (!conversationActive && !isRecording) {
-                // Sarvam batch processing
-                if (mediaRecorder && mediaRecorder.state === 'inactive') {
-                    isRecording = true;
-                    audioChunks = []; // Reset chunks
-                    mediaRecorder.start();
-                    setCharacterState('listening');
-                    addStatusMessage('system', '🎙️ Listening... Speak now!');
-                }
-            }
-        }
-
-        function stopRecording() {
-            if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') {
-                isRecording = false;
-                mediaRecorder.stop();
-
-                if (conversationActive) {
-                    // ElevenLabs - immediate processing
-                    setCharacterState('ready');
-                    addStatusMessage('system', '🔄 Processing your voice...');
-                } else {
-                    // Sarvam - batch processing
-                    setCharacterState('');
-                    addStatusMessage('system', '⏳ Processing your voice...');
-                }
-            }
+            console.log(`${label} ${message}`);
         }
 
         function streamAudioChunk(base64Audio) {
@@ -812,158 +410,6 @@
                 socket.emit('audio_chunk', { audio: base64Audio });
             }
         }
-
-        function sendAudioToServer(base64Audio) {
-            fetch('/talk', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ audio: base64Audio })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    addStatusMessage('user', data.transcript);
-                    addStatusMessage('ai', data.ai_response);
-
-                    // Set character to talking state and play audio
-                    setCharacterState('talking');
-
-                    if (data.response_audio) {
-                        playResponseAudio(data.response_audio);
-                    } else {
-                        addStatusMessage('system', 'Warning: No audio response received');
-                        setCharacterState('');
-                    }
-                } else {
-                    addStatusMessage('system', 'Error: ' + data.error);
-                    setCharacterState('');
-                }
-                buttonText.innerHTML = '🎤<br>Record';
-            })
-            .catch(error => {
-                addStatusMessage('system', 'Error sending audio: ' + error.message);
-                buttonText.innerHTML = '🎤<br>Record';
-                setCharacterState('');
-                console.error('Error:', error);
-            });
-        }
-
-        function playResponseAudio(base64Audio) {
-            if (!base64Audio) {
-                console.error('No audio data to play');
-                setCharacterState('');
-                return;
-            }
-
-            const audio = new Audio();
-            audio.src = 'data:audio/wav;base64,' + base64Audio;
-
-            audio.onloadeddata = () => {
-                console.log('Audio loaded successfully');
-            };
-
-            audio.onerror = (err) => {
-                console.error('Audio loading error:', err);
-                setCharacterState('');
-            };
-
-            audio.onended = () => {
-                setCharacterState('');
-                addStatusMessage('system', 'Ready for your next question!');
-            };
-
-            audio.play().then(() => {
-                console.log('Audio playing successfully');
-            }).catch(err => {
-                console.error('Error playing audio:', err);
-                // Try with different audio format
-                audio.src = 'data:audio/mpeg;base64,' + base64Audio;
-                audio.play().catch(err2 => {
-                    console.error('Error playing audio with mpeg format:', err2);
-                    setCharacterState('');
-                });
-            });
-        }
-
-        // Topic selection event listeners
-        function setupTopicListeners() {
-            console.log('Setting up topic button listeners');
-            const topicButtons = document.querySelectorAll('.topic-button');
-            console.log('Found topic buttons:', topicButtons.length);
-
-            topicButtons.forEach(button => {
-                console.log('Setting up listener for button:', button.getAttribute('data-topic'));
-                button.addEventListener('click', () => {
-                    console.log('Topic button clicked:', button.getAttribute('data-topic'));
-                    const topic = button.getAttribute('data-topic');
-                    setTopic(topic);
-                });
-            });
-        }
-
-        function setTopic(topic) {
-            console.log('🎯 Setting topic:', topic);
-            currentTopic = topic;
-
-            // First, set the topic via HTTP (works for both integrations)
-            fetch('/set_topic', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ topic: topic })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('📝 Topic response received:', data);
-
-                if (data.success) {
-                    useElevenLabs = data.using_elevenlabs || false;
-
-                    if (useElevenLabs) {
-                        // Start ElevenLabs conversation via WebSocket
-                        console.log('🚀 Starting ElevenLabs conversation...');
-                        if (socket && isConnected) {
-                            socket.emit('start_conversation', { topic: topic });
-                        } else {
-                            addStatusMessage('system', '❌ Not connected to server. Please refresh and try again.');
-                            return;
-                        }
-                    } else {
-                        // Traditional Sarvam flow
-                        showVoiceControls(topic);
-                    }
-                } else {
-                    addStatusMessage('system', '❌ Error setting topic: ' + data.error);
-                }
-            })
-            .catch(error => {
-                addStatusMessage('system', '❌ Error setting topic: ' + error.message);
-                console.error('Error:', error);
-            });
-        }
-
-        function showVoiceControls(topic) {
-            // Hide topic selection and show voice controls
-            if (topicSelection && voiceControls && spacebarHint) {
-                topicSelection.style.display = 'none';
-                voiceControls.style.display = 'block';
-                spacebarHint.style.display = 'block';
-
-                const integrationName = useElevenLabs ? 'ElevenLabs' : 'Sarvam';
-                addStatusMessage('system', `📚 Topic set to: ${topic}. Using ${integrationName} integration. ${useElevenLabs ? 'Nani is ready for real-time conversation!' : 'Start by saying hello!'}`);
-
-                if (useElevenLabs) {
-                    setCharacterState('ready');
-                } else {
-                    setCharacterState('');
-                }
-            }
-        }
-
-
     </script>
 </body>
 </html>

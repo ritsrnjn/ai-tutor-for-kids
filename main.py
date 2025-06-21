@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 import base64
 import os
 from dotenv import load_dotenv
+import image_util
 
 # Load environment variables
 load_dotenv()
@@ -10,6 +11,7 @@ load_dotenv()
 # Import both integrations
 import sarvam_integration
 import elevenlabs_integration
+import image_util
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
@@ -99,11 +101,19 @@ def talk():
         else:
             print("Warning: No audio data in response object")
 
+        # Generate image for the AI response
+        try:
+            image_url = image_util.generate_relevant_image(ai_response)
+        except Exception as e:
+            print(f"Error generating image: {e}")
+            image_url = None
+
         return jsonify({
             'success': True,
             'transcript': transcript,
             'ai_response': ai_response,
             'response_audio': response_audio,
+            'image_url': image_url,
             'message': 'Conversation completed successfully'
         })
 
@@ -139,6 +149,29 @@ def end_elevenlabs_conversation():
     try:
         result = elevenlabs_integration.end_conversation()
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/create_image', methods=['POST'])
+def create_image():
+    """Generate an image based on AI response"""
+    try:
+        data = request.json
+        ai_response = data.get('response')
+
+        if not ai_response:
+            return jsonify({'error': 'No AI response provided'}), 400
+
+        # Generate image using the image utility
+        image_url, highlight_word = image_util.generate_relevant_image_and_highlight_word(ai_response)
+
+        return jsonify({
+            'success': True,
+            'image_url': image_url,
+            'ai_response': ai_response,
+            'highlight_word': highlight_word
+        })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
