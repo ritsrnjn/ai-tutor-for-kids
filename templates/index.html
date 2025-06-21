@@ -42,13 +42,194 @@
             min-height: 500px;
         }
 
-        /* Style the ElevenLabs widget container */
-        elevenlabs-convai {
+        /* Voice Trigger Button Styles */
+        .voice-trigger-container {
             width: 100%;
             height: 100%;
-            min-height: 400px;
-            border-radius: 20px;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .voice-trigger-button {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(139, 69, 192, 0.3) 0%, rgba(79, 172, 254, 0.2) 50%, transparent 70%);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            user-select: none;
+        }
+
+        .voice-trigger-button:hover {
+            transform: scale(1.05);
+        }
+
+        .voice-trigger-button.active {
+            background: radial-gradient(circle, rgba(139, 69, 192, 0.5) 0%, rgba(79, 172, 254, 0.3) 50%, transparent 70%);
+        }
+
+        .pulse-ring {
+            position: absolute;
+            border: 3px solid rgba(139, 69, 192, 0.8);
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            animation: pulse-ring 2s cubic-bezier(0.25, 0, 0, 1) infinite;
+        }
+
+        .pulse-ring-2 {
+            animation-delay: 0.5s;
+            border-color: rgba(79, 172, 254, 0.6);
+        }
+
+        .pulse-ring-3 {
+            animation-delay: 1s;
+            border-color: rgba(168, 85, 247, 0.4);
+        }
+
+        .trigger-core {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b45c0, #4facfe);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 0 30px rgba(139, 69, 192, 0.5),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .voice-trigger-button:hover .trigger-core {
+            box-shadow:
+                0 0 50px rgba(139, 69, 192, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+
+                .voice-trigger-button.active .trigger-core {
+            background: linear-gradient(135deg, #ff6b6b, #4facfe);
+            box-shadow:
+                0 0 60px rgba(255, 107, 107, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .voice-trigger-button.processing .trigger-core {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            box-shadow:
+                0 0 60px rgba(240, 147, 251, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: processing-pulse 1.5s ease-in-out infinite;
+        }
+
+        .voice-trigger-button.speaking .trigger-core {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            box-shadow:
+                0 0 60px rgba(79, 172, 254, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: speaking-glow 2s ease-in-out infinite;
+        }
+
+        .trigger-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .voice-trigger-button.active .trigger-icon {
+            animation: bounce 0.6s ease infinite alternate;
+        }
+
+        .trigger-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .voice-visualizer {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .voice-trigger-button.listening .voice-visualizer {
+            opacity: 1;
+        }
+
+        .visualizer-bar {
+            width: 3px;
+            height: 20px;
+            background: linear-gradient(to top, #4facfe, #8b45c0);
+            border-radius: 2px;
+            animation: visualizer 0.6s ease-in-out infinite alternate;
+        }
+
+        .visualizer-bar:nth-child(2) { animation-delay: 0.1s; }
+        .visualizer-bar:nth-child(3) { animation-delay: 0.2s; }
+        .visualizer-bar:nth-child(4) { animation-delay: 0.3s; }
+        .visualizer-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        .voice-status {
+            font-size: 1.2rem;
+            color: #333;
+            text-align: center;
+            font-weight: 500;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        /* Animations */
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            80%, 100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+
+        @keyframes visualizer {
+            from { height: 10px; }
+            to { height: 30px; }
+        }
+
+        @keyframes processing-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes speaking-glow {
+            0%, 100% {
+                box-shadow:
+                    0 0 60px rgba(79, 172, 254, 0.8),
+                    inset 0 0 30px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow:
+                    0 0 80px rgba(79, 172, 254, 1),
+                    inset 0 0 40px rgba(255, 255, 255, 0.4);
+            }
         }
 
         /* Right Side - Better alignment */
@@ -107,9 +288,19 @@
                 min-height: 400px;
             }
 
-            /* ElevenLabs widget responsive adjustments */
-            elevenlabs-convai {
-                min-height: 350px;
+            /* Voice trigger responsive adjustments */
+            .voice-trigger-button {
+                width: 220px;
+                height: 220px;
+            }
+
+            .trigger-core {
+                width: 160px;
+                height: 160px;
+            }
+
+            .trigger-icon {
+                font-size: 2.5rem;
             }
         }
 
@@ -123,18 +314,50 @@
                 min-height: 250px;
             }
 
-            elevenlabs-convai {
-                min-height: 300px;
+            .voice-trigger-button {
+                width: 180px;
+                height: 180px;
+            }
+
+            .trigger-core {
+                width: 130px;
+                height: 130px;
+            }
+
+            .trigger-icon {
+                font-size: 2rem;
+            }
+
+            .trigger-text {
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="main-container">
-        <!-- Left Side - ElevenLabs ConvAI Widget -->
+        <!-- Left Side - Custom Voice Trigger Button -->
         <div class="left-widget">
-            <!-- ElevenLabs ConvAI Embed -->
-            <elevenlabs-convai agent-id="agent_01jy9sz4gnew0vedv885xsrse1"></elevenlabs-convai>
+            <!-- Custom Voice Trigger Button -->
+            <div class="voice-trigger-container">
+                <div class="voice-trigger-button" id="voiceTrigger">
+                    <div class="pulse-ring"></div>
+                    <div class="pulse-ring pulse-ring-2"></div>
+                    <div class="pulse-ring pulse-ring-3"></div>
+                    <div class="trigger-core">
+                        <div class="trigger-icon">🎤</div>
+                        <div class="trigger-text">Tap to Talk</div>
+                    </div>
+                    <div class="voice-visualizer">
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                        <div class="visualizer-bar"></div>
+                    </div>
+                </div>
+                <div class="voice-status" id="voiceStatus">Ready to chat with Nani</div>
+            </div>
         </div>
 
         <!-- Right Side - Space for Image Widget -->
@@ -146,8 +369,7 @@
     <!-- Connection Status Badge (moved to bottom left) -->
     <div class="connection-status" id="connectionBadge">🔄 Connecting...</div>
 
-    <!-- ElevenLabs ConvAI Widget -->
-    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+    <!-- Custom Voice Trigger Button (No external dependencies needed) -->
 
     <!-- Socket.IO Client Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
@@ -170,11 +392,13 @@
         let audioBuffer = [];
 
         // DOM elements
-        let status, aiCharacter, soundWaves, connectionBadge;
+        let voiceTrigger, voiceStatus, connectionBadge;
+        let isListening = false;
+        let currentState = 'idle'; // idle, listening, processing, speaking
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing AI Tutor with WebSocket support');
+            console.log('🚀 Initializing AI Tutor with Custom Voice Trigger');
 
             // Initialize DOM elements
             initializeDOMElements();
@@ -185,6 +409,9 @@
             // Setup audio recording
             initializeAudioRecording();
 
+            // Setup voice trigger button
+            setupVoiceTrigger();
+
             // Auto-start conversation for simplified flow
             setTimeout(() => {
                 if (socket && isConnected) {
@@ -194,10 +421,109 @@
         });
 
         function initializeDOMElements() {
-            // AI character replaced with ElevenLabs widget
+            voiceTrigger = document.getElementById('voiceTrigger');
+            voiceStatus = document.getElementById('voiceStatus');
             connectionBadge = document.getElementById('connectionBadge');
 
             console.log('📋 DOM elements initialized');
+        }
+
+        function setupVoiceTrigger() {
+            if (!voiceTrigger) return;
+
+            // Click/Touch event for voice trigger
+            voiceTrigger.addEventListener('click', handleVoiceTrigger);
+            voiceTrigger.addEventListener('touchstart', handleVoiceTrigger);
+
+            // Prevent default touch behaviors
+            voiceTrigger.addEventListener('touchstart', (e) => e.preventDefault());
+            voiceTrigger.addEventListener('touchend', (e) => e.preventDefault());
+
+            console.log('🎤 Voice trigger button initialized');
+        }
+
+        function handleVoiceTrigger() {
+            if (!conversationActive) {
+                updateVoiceStatus('Please wait, starting conversation...');
+                return;
+            }
+
+            if (currentState === 'idle') {
+                startListening();
+            } else if (currentState === 'listening') {
+                stopListening();
+            }
+        }
+
+        function startListening() {
+            if (!mediaRecorder || mediaRecorder.state !== 'inactive') return;
+
+            currentState = 'listening';
+            isListening = true;
+
+            // Update UI
+            voiceTrigger.classList.add('active', 'listening');
+            updateVoiceStatus('Listening... Speak now!');
+
+            // Start recording
+            try {
+                mediaRecorder.start(100); // 100ms chunks
+                console.log('🎤 Started listening');
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                stopListening();
+            }
+        }
+
+        function stopListening() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+            currentState = 'processing';
+            isListening = false;
+
+            // Update UI
+            voiceTrigger.classList.remove('listening');
+            voiceTrigger.classList.add('processing');
+            updateVoiceStatus('Processing... Please wait');
+
+            // Stop recording
+            try {
+                mediaRecorder.stop();
+                console.log('🛑 Stopped listening');
+            } catch (error) {
+                console.error('Error stopping recording:', error);
+            }
+        }
+
+        function updateVoiceStatus(message) {
+            if (voiceStatus) {
+                voiceStatus.textContent = message;
+            }
+        }
+
+        function setVoiceTriggerState(state, message) {
+            currentState = state;
+
+            // Reset all classes
+            voiceTrigger.classList.remove('active', 'listening', 'processing', 'speaking');
+
+            switch(state) {
+                case 'idle':
+                    updateVoiceStatus(message || 'Ready to chat with Nani');
+                    break;
+                case 'listening':
+                    voiceTrigger.classList.add('active', 'listening');
+                    updateVoiceStatus(message || 'Listening... Speak now!');
+                    break;
+                case 'processing':
+                    voiceTrigger.classList.add('active', 'processing');
+                    updateVoiceStatus(message || 'Processing your message...');
+                    break;
+                case 'speaking':
+                    voiceTrigger.classList.add('active', 'speaking');
+                    updateVoiceStatus(message || 'Nani is speaking...');
+                    break;
+            }
         }
 
         function initializeWebSocket() {
@@ -233,10 +559,11 @@
                 conversationActive = data.success;
                 if (data.success) {
                     useElevenLabs = true;
-                    addStatusMessage('system', '🎙️ Conversation started! Nani is listening...');
-                    setCharacterState('ready');
+                    addStatusMessage('system', '🎙️ Conversation started! Nani is ready...');
+                    setVoiceTriggerState('idle', 'Tap to talk with Nani');
                 } else {
                     addStatusMessage('system', `❌ Failed to start conversation: ${data.error}`);
+                    setVoiceTriggerState('idle', 'Failed to start - please refresh');
                 }
             });
 
@@ -244,7 +571,7 @@
                 console.log('🛑 Conversation ended:', data);
                 conversationActive = false;
                 addStatusMessage('system', '👋 Conversation ended. Restarting...');
-                setCharacterState('');
+                setVoiceTriggerState('idle', 'Restarting conversation...');
                 // Auto-restart conversation
                 setTimeout(() => {
                     if (socket && isConnected) {
@@ -256,7 +583,14 @@
             socket.on('agent_response', (data) => {
                 console.log('🤖 Agent response:', data.response);
                 addStatusMessage('ai', data.response);
-                setCharacterState('talking');
+                setVoiceTriggerState('speaking', 'Nani is speaking...');
+
+                // Auto-return to idle after response (simulating speech duration)
+                setTimeout(() => {
+                    if (currentState === 'speaking') {
+                        setVoiceTriggerState('idle', 'Tap to talk with Nani');
+                    }
+                }, 3000);
 
                 // call create_image api to get the image url and then pass it in imageDisplayComponent
                 // fetch('/create_image', {
@@ -281,6 +615,7 @@
             socket.on('user_transcript', (data) => {
                 console.log('🎤 User transcript:', data.transcript);
                 addStatusMessage('user', data.transcript);
+                setVoiceTriggerState('processing', 'Processing your message...');
             });
 
             socket.on('agent_response_correction', (data) => {
@@ -334,7 +669,7 @@
 
                 // Handle data available for real-time streaming
                 mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0 && conversationActive) {
+                    if (event.data.size > 0 && conversationActive && isListening) {
                         // Convert to base64 and stream immediately for ElevenLabs
                         const reader = new FileReader();
                         reader.onloadend = () => {
@@ -343,6 +678,17 @@
                         };
                         reader.readAsDataURL(event.data);
                     }
+                };
+
+                // Handle recording stop
+                mediaRecorder.onstop = () => {
+                    console.log('🎤 Recording stopped');
+                    // Reset to idle state after a short delay if no response comes
+                    setTimeout(() => {
+                        if (currentState === 'processing') {
+                            setVoiceTriggerState('idle', 'Tap to talk with Nani');
+                        }
+                    }, 10000); // 10 second timeout
                 };
 
                 addStatusMessage('system', '🎤 Microphone access granted! Ready to chat.');
@@ -357,24 +703,8 @@
         }
 
         function startContinuousRecording() {
-            // Start continuous recording when conversation becomes active
-            const checkAndRecord = () => {
-                if (conversationActive && !isRecording && mediaRecorder && mediaRecorder.state === 'inactive') {
-                    isRecording = true;
-                    mediaRecorder.start(100); // 100ms chunks for real-time streaming
-                    setCharacterState('listening');
-                }
-
-                // Check again in 1 second
-                setTimeout(checkAndRecord, 1000);
-            };
-
-            checkAndRecord();
-        }
-
-        function setCharacterState(state) {
-            // Character state is now handled by ElevenLabs widget
-            console.log(`Character state: ${state}`);
+            // Recording is now manual via trigger button
+            console.log('🎙️ Recording ready - use trigger button to start/stop');
         }
 
         function updateConnectionStatus(status) {
