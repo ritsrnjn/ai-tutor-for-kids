@@ -8,8 +8,7 @@ import image_util
 # Load environment variables
 load_dotenv()
 
-# Import both integrations
-import sarvam_integration
+# Import ElevenLabs integration only
 import elevenlabs_integration
 import image_util
 
@@ -19,14 +18,9 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 # Initialize SocketIO for WebSocket support
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Choose which integration to use (can be controlled via environment variable)
-USE_ELEVENLABS = os.getenv('USE_ELEVENLABS', 'false').lower() == 'true'
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/set_topic', methods=['POST'])
 def set_topic():
@@ -38,88 +32,19 @@ def set_topic():
         if not topic:
             return jsonify({'error': 'No topic provided'}), 400
 
-        if USE_ELEVENLABS:
-            # Use ElevenLabs integration
-            result = elevenlabs_integration.set_topic(topic)
-            if result:
-                return jsonify({
-                    'success': True,
-                    'message': f'Topic set to: {topic}',
-                    'topic': topic,
-                    'using_elevenlabs': True
-                })
-            else:
-                return jsonify({'error': 'Failed to set topic in ElevenLabs'}), 500
-        else:
-            # Use Sarvam integration (existing behavior)
-            sarvam_integration.set_topic(topic)
+        # Use ElevenLabs integration
+        result = elevenlabs_integration.set_topic(topic)
+        if result:
             return jsonify({
                 'success': True,
                 'message': f'Topic set to: {topic}',
-                'topic': topic,
-                'using_elevenlabs': False
+                'topic': topic
             })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/talk', methods=['POST'])
-def talk():
-    try:
-        data = request.json
-        audio_base64 = data.get('audio')
-
-        if not audio_base64:
-            return jsonify({'error': 'No audio data provided'}), 400
-
-        # Step 1: Convert base64 to bytes and save as WAV file
-        audio_data = base64.b64decode(audio_base64)
-        audio_filename = 'recorded_audio.wav'
-
-        with open(audio_filename, 'wb') as audio_file:
-            audio_file.write(audio_data)
-
-        # Step 2: Transcribe the audio
-        transcript = sarvam_integration.transcribe_file(audio_filename)
-
-        if not transcript or transcript.strip() == "":
-            return jsonify({'error': 'Could not transcribe audio'}), 400
-
-        # Step 3: Get AI response using chat completion
-        ai_response = sarvam_integration.chat_completion(transcript)
-
-        # Step 4: Convert AI response to speech
-        response_audio_obj = sarvam_integration.convert_text_to_speech(
-            ai_response)
-
-        # Extract the base64 audio data from the response object
-        response_audio = None
-        if hasattr(response_audio_obj, 'audios') and len(
-                response_audio_obj.audios) > 0:
-            response_audio = response_audio_obj.audios[0]
         else:
-            print("Warning: No audio data in response object")
-
-        # Generate image for the AI response
-        try:
-            image_url = image_util.generate_relevant_image(ai_response)
-        except Exception as e:
-            print(f"Error generating image: {e}")
-            image_url = None
-
-        return jsonify({
-            'success': True,
-            'transcript': transcript,
-            'ai_response': ai_response,
-            'response_audio': response_audio,
-            'image_url': image_url,
-            'message': 'Conversation completed successfully'
-        })
+            return jsonify({'error': 'Failed to set topic in ElevenLabs'}), 500
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 # ElevenLabs-specific routes and SocketIO handlers
 @app.route('/elevenlabs/status', methods=['GET'])
@@ -263,6 +188,6 @@ def setup_elevenlabs_callbacks():
 setup_elevenlabs_callbacks()
 
 if __name__ == '__main__':
-    print(f"Starting server with {'ElevenLabs' if USE_ELEVENLABS else 'Sarvam'} integration")
+    print("Starting server with ElevenLabs integration")
     # Use SocketIO's run method instead of app.run for WebSocket support
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)

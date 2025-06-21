@@ -47,7 +47,7 @@ class ElevenLabsManager:
 
     def get_topic_prompt(self, topic: str) -> str:
         """
-        Generate the system prompt for a specific topic, similar to the Sarvam implementation
+        Generate the system prompt for a specific topic
         """
         return f"""You are Nani, a warm and loving grandmother who is a Hindi language coach for children. You speak primarily in English but your main objective is to teach Hindi vocabulary and culture.
 
@@ -270,7 +270,7 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
 # Global instance for backward compatibility
 elevenlabs_manager = ElevenLabsManager()
 
-# Convenience functions that mirror the Sarvam integration API
+# Main API functions for ElevenLabs integration
 def set_topic(topic: str) -> dict:
     """Set the topic for the current learning session"""
     return elevenlabs_manager.create_or_update_agent(topic)

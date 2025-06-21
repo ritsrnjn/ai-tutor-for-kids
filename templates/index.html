@@ -259,23 +259,23 @@
                 setCharacterState('talking');
 
                 // call create_image api to get the image url and then pass it in imageDisplayComponent
-                fetch('/create_image', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ response: data.response })
-                })
-                .then(response => response.json())
-                .then(dataFromCreateImage => {
-                    console.log('🖼️ Image URL:', dataFromCreateImage.image_url);
-                    if (window.imageDisplayComponent) {
-                        window.imageDisplayComponent.displayImageForResponse(dataFromCreateImage, dataFromCreateImage.image_url);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error generating image:', error);
-                });
+                // fetch('/create_image', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify({ response: data.response })
+                // })
+                // .then(response => response.json())
+                // .then(dataFromCreateImage => {
+                //     console.log('🖼️ Image URL:', dataFromCreateImage.image_url);
+                //     if (window.imageDisplayComponent) {
+                //         window.imageDisplayComponent.displayImageForResponse(dataFromCreateImage, dataFromCreateImage.image_url);
+                //     }
+                // })
+                // .catch(error => {
+                //     console.error('Error generating image:', error);
+                // });
             });
 
             socket.on('user_transcript', (data) => {
