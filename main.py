@@ -8,8 +8,9 @@ import image_util
 # Load environment variables
 load_dotenv()
 
-# Import ElevenLabs integration only
+# Import ElevenLabs and LiveKit integrations
 import elevenlabs_integration
+import livekit_elevenlabs_integration
 import image_util
 
 app = Flask(__name__)
@@ -32,16 +33,19 @@ def set_topic():
         if not topic:
             return jsonify({'error': 'No topic provided'}), 400
 
-        # Use ElevenLabs integration
-        result = elevenlabs_integration.set_topic(topic)
-        if result:
+        # Set topic for both ElevenLabs and LiveKit integrations
+        elevenlabs_result = elevenlabs_integration.set_topic(topic)
+        livekit_elevenlabs_integration.set_livekit_topic(topic)
+
+        if elevenlabs_result:
             return jsonify({
                 'success': True,
                 'message': f'Topic set to: {topic}',
-                'topic': topic
+                'topic': topic,
+                'integrations': ['elevenlabs', 'livekit']
             })
         else:
-            return jsonify({'error': 'Failed to set topic in ElevenLabs'}), 500
+            return jsonify({'error': 'Failed to set topic'}), 500
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -74,6 +78,38 @@ def end_elevenlabs_conversation():
     try:
         result = elevenlabs_integration.end_conversation()
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# LiveKit-specific routes
+@app.route('/livekit/status', methods=['GET'])
+def livekit_status():
+    """Get LiveKit status"""
+    try:
+        return jsonify({
+            'success': True,
+            'current_topic': livekit_elevenlabs_integration.current_topic,
+            'message': 'LiveKit integration ready'
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/livekit/set_topic', methods=['POST'])
+def set_livekit_topic():
+    """Set topic for LiveKit session"""
+    try:
+        data = request.json
+        topic = data.get('topic')
+
+        if not topic:
+            return jsonify({'error': 'No topic provided'}), 400
+
+        livekit_elevenlabs_integration.set_livekit_topic(topic)
+        return jsonify({
+            'success': True,
+            'message': f'LiveKit topic set to: {topic}',
+            'topic': topic
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -188,6 +224,6 @@ def setup_elevenlabs_callbacks():
 setup_elevenlabs_callbacks()
 
 if __name__ == '__main__':
-    print("Starting server with ElevenLabs integration")
+    print("Starting server with ElevenLabs + LiveKit integration")
     # Use SocketIO's run method instead of app.run for WebSocket support
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)
