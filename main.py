@@ -10,6 +10,29 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/set_topic', methods=['POST'])
+def set_topic():
+    """Set the topic for the current learning session"""
+    try:
+        data = request.json
+        topic = data.get('topic')
+
+        if not topic:
+            return jsonify({'error': 'No topic provided'}), 400
+
+        # Set the topic in the sarvam integration
+        sarvam_integration.set_topic(topic)
+
+        return jsonify({
+            'success': True,
+            'message': f'Topic set to: {topic}',
+            'topic': topic
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/talk', methods=['POST'])
 def talk():
     try:
@@ -60,4 +83,4 @@ def talk():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)

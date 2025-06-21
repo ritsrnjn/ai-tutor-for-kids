@@ -21,7 +21,7 @@
             align-items: center;
             overflow: hidden;
         }
-        
+
         .container {
             text-align: center;
             background: rgba(255, 255, 255, 0.95);
@@ -163,6 +163,51 @@
         .wave:nth-child(2) { animation-delay: 0.5s; }
         .wave:nth-child(3) { animation-delay: 1s; }
 
+        /* Topic Selection */
+        .topic-selection {
+            margin: 2rem 0;
+        }
+
+        .topic-selection h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .topic-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 1rem;
+        }
+
+        .topic-button {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .topic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .topic-button:active {
+            transform: scale(0.95);
+        }
+
+        .topic-hint {
+            color: #666;
+            font-size: 0.95rem;
+            font-style: italic;
+        }
+
         /* Control buttons */
         .controls {
             margin: 2rem 0;
@@ -281,9 +326,9 @@
 </head>
 <body>
     <div class="container">
-        <h1>Shalini - Your AI tutor</h1>
-        <p class="subtitle">Intelligent digital partner</p>
-        
+        <h1>Nani - Your Hindi Coach</h1>
+        <p class="subtitle">Learn Hindi through mythological stories</p>
+
         <!-- AI Character -->
         <div class="ai-character" id="aiCharacter">
             <div class="character-face">
@@ -294,7 +339,7 @@
                     <div class="pupil"></div>
                 </div>
                 <div class="mouth"></div>
-                
+
                 <!-- Sound waves for listening state -->
                 <div class="sound-waves" style="display: none;">
                     <div class="wave"></div>
@@ -303,48 +348,92 @@
                 </div>
             </div>
         </div>
-        
+
+                <!-- Topic Selection -->
+        <div class="topic-selection" id="topicSelection">
+            <h3>Choose a topic to learn:</h3>
+            <div class="topic-buttons">
+                <button class="topic-button" data-topic="animals">🦁 Animals</button>
+                <button class="topic-button" data-topic="birds">🦅 Birds</button>
+                <button class="topic-button" data-topic="nature">🌳 Nature</button>
+                <button class="topic-button" data-topic="colors">🌈 Colors</button>
+                <button class="topic-button" data-topic="family">👨‍👩‍👧‍👦 Family</button>
+                <button class="topic-button" data-topic="emotions">😊 Emotions</button>
+            </div>
+            <p class="topic-hint">Select a topic to start learning Hindi vocabulary with Nani!</p>
+        </div>
+
         <!-- Controls -->
-        <div class="controls">
+        <div class="controls" id="voiceControls" style="display: none;">
             <button class="record-button" id="recordButton">
                 <span id="buttonText">🎤<br>Record</span>
             </button>
         </div>
-        
-        <div class="spacebar-hint">Press SPACEBAR to start/stop recording</div>
-        
+
+        <div class="spacebar-hint" id="spacebarHint" style="display: none;">Press SPACEBAR to start/stop recording</div>
+
         <!-- Status -->
         <div class="status" id="status">
             <div class="status-item system">
-                <strong>Ready:</strong> Click the microphone or press spacebar to start talking!
+                <strong>Welcome:</strong> Choose a topic above to start learning Hindi vocabulary with Nani!
             </div>
         </div>
     </div>
 
-    <script>
+            <script>
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
-        
-        const recordButton = document.getElementById('recordButton');
-        const status = document.getElementById('status');
-        const buttonText = document.getElementById('buttonText');
-        const aiCharacter = document.getElementById('aiCharacter');
-        const soundWaves = document.querySelector('.sound-waves');
-        
+        let currentTopic = null;
+
+        let recordButton, status, buttonText, aiCharacter, soundWaves, topicSelection, voiceControls, spacebarHint;
+
+        // Initialize DOM elements when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing DOM elements');
+            recordButton = document.getElementById('recordButton');
+            status = document.getElementById('status');
+            buttonText = document.getElementById('buttonText');
+            aiCharacter = document.getElementById('aiCharacter');
+            soundWaves = document.querySelector('.sound-waves');
+            topicSelection = document.getElementById('topicSelection');
+            voiceControls = document.getElementById('voiceControls');
+            spacebarHint = document.getElementById('spacebarHint');
+
+            console.log('Elements found:', {
+                recordButton: !!recordButton,
+                topicSelection: !!topicSelection,
+                voiceControls: !!voiceControls
+            });
+
+            // Set up topic button listeners
+            setupTopicListeners();
+
+            // Set up record button listener
+            if (recordButton) {
+                recordButton.addEventListener('click', () => {
+                    if (!isRecording) {
+                        startRecording();
+                    } else {
+                        stopRecording();
+                    }
+                });
+            }
+        });
+
         // Request microphone permission on page load
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
                 mediaRecorder = new MediaRecorder(stream);
-                
+
                 mediaRecorder.ondataavailable = event => {
                     audioChunks.push(event.data);
                 };
-                
+
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                     audioChunks = [];
-                    
+
                     // Convert to base64
                     const reader = new FileReader();
                     reader.onloadend = () => {
@@ -353,43 +442,43 @@
                     };
                     reader.readAsDataURL(audioBlob);
                 };
-                
+
                 addStatusMessage('system', 'Microphone access granted! Ready to chat.');
             })
             .catch(err => {
                 addStatusMessage('system', 'Microphone access denied. Please allow microphone access to use the voice assistant.');
                 console.error('Error accessing microphone:', err);
             });
-        
+
         function setCharacterState(state) {
             aiCharacter.className = 'ai-character';
             if (state) {
                 aiCharacter.classList.add(state);
             }
-            
+
             if (state === 'listening') {
                 soundWaves.style.display = 'block';
             } else {
                 soundWaves.style.display = 'none';
             }
         }
-        
+
         function addStatusMessage(type, message) {
             const statusItem = document.createElement('div');
             statusItem.className = `status-item ${type}`;
-            
+
             let label = '';
             switch(type) {
                 case 'user': label = 'You said:'; break;
                 case 'ai': label = 'AI Response:'; break;
                 case 'system': label = 'Status:'; break;
             }
-            
+
             statusItem.innerHTML = `<strong>${label}</strong> ${message}`;
             status.appendChild(statusItem);
             status.scrollTop = status.scrollHeight;
         }
-        
+
         function startRecording() {
             if (mediaRecorder && mediaRecorder.state === 'inactive') {
                 isRecording = true;
@@ -400,7 +489,7 @@
                 addStatusMessage('system', 'Listening... Speak now!');
             }
         }
-        
+
         function stopRecording() {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 isRecording = false;
@@ -411,7 +500,7 @@
                 addStatusMessage('system', 'Processing your voice...');
             }
         }
-        
+
         function sendAudioToServer(base64Audio) {
             fetch('/talk', {
                 method: 'POST',
@@ -425,10 +514,10 @@
                 if (data.success) {
                     addStatusMessage('user', data.transcript);
                     addStatusMessage('ai', data.ai_response);
-                    
+
                     // Set character to talking state and play audio
                     setCharacterState('talking');
-                    
+
                     if (data.response_audio) {
                         playResponseAudio(data.response_audio);
                     } else {
@@ -448,31 +537,31 @@
                 console.error('Error:', error);
             });
         }
-        
+
         function playResponseAudio(base64Audio) {
             if (!base64Audio) {
                 console.error('No audio data to play');
                 setCharacterState('');
                 return;
             }
-            
+
             const audio = new Audio();
             audio.src = 'data:audio/wav;base64,' + base64Audio;
-            
+
             audio.onloadeddata = () => {
                 console.log('Audio loaded successfully');
             };
-            
+
             audio.onerror = (err) => {
                 console.error('Audio loading error:', err);
                 setCharacterState('');
             };
-            
+
             audio.onended = () => {
                 setCharacterState('');
                 addStatusMessage('system', 'Ready for your next question!');
             };
-            
+
             audio.play().then(() => {
                 console.log('Audio playing successfully');
             }).catch(err => {
@@ -485,7 +574,7 @@
                 });
             });
         }
-        
+
         // Spacebar event listener
         document.addEventListener('keydown', (event) => {
             if (event.code === 'Space') {
@@ -497,15 +586,57 @@
                 }
             }
         });
-        
-        // Button click event
-        recordButton.addEventListener('click', () => {
-            if (!isRecording) {
-                startRecording();
-            } else {
-                stopRecording();
-            }
-        });
+
+                // Topic selection event listeners
+        function setupTopicListeners() {
+            console.log('Setting up topic button listeners');
+            const topicButtons = document.querySelectorAll('.topic-button');
+            console.log('Found topic buttons:', topicButtons.length);
+
+            topicButtons.forEach(button => {
+                console.log('Setting up listener for button:', button.getAttribute('data-topic'));
+                button.addEventListener('click', () => {
+                    console.log('Topic button clicked:', button.getAttribute('data-topic'));
+                    const topic = button.getAttribute('data-topic');
+                    setTopic(topic);
+                });
+            });
+        }
+
+        function setTopic(topic) {
+            console.log('setTopic called with topic:', topic);
+            currentTopic = topic;
+
+            // Send topic to server
+            fetch('/set_topic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ topic: topic })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Topic response received:', data);
+                if (data.success) {
+                    // Hide topic selection and show voice controls
+                    console.log('Hiding topic selection, showing voice controls');
+                    topicSelection.style.display = 'none';
+                    voiceControls.style.display = 'block';
+                    spacebarHint.style.display = 'block';
+
+                    addStatusMessage('system', `Topic set to: ${topic}. Nani is ready to teach you! Start by saying hello!`);
+                } else {
+                    addStatusMessage('system', 'Error setting topic: ' + data.error);
+                }
+            })
+            .catch(error => {
+                addStatusMessage('system', 'Error setting topic: ' + error.message);
+                console.error('Error:', error);
+            });
+        }
+
+
     </script>
 </body>
 </html>
