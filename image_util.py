@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 import os
-
+import gemini_integration
 
 def generate_image(prompt):
     """
@@ -13,6 +13,8 @@ def generate_image(prompt):
     try:
         # Use OpenAI DALL-E to generate the image
         image_url = openai_integration.generate_image_with_dalle(prompt)
+
+        # image_url = gemini_integration.generate_image(prompt)
 
         if image_url:
             return image_url

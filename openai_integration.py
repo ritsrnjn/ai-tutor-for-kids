@@ -71,6 +71,7 @@ def generate_image_with_dalle(prompt):
     """
     Generate an image using DALL-E based on the prompt
     """
+
     try:
         response = openai.Image.create(
             prompt=prompt,
