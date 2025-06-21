@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,6 +20,16 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            padding: 20px;
+        }
+
+        .main-wrapper {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            max-width: 1200px;
+            width: 100%;
+            min-height: 80vh;
         }
 
         .container {
@@ -27,10 +37,83 @@
             background: rgba(255, 255, 255, 0.95);
             padding: 3rem;
             border-radius: 25px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
             max-width: 500px;
-            width: 90%;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .image-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            width: 400px;
+            max-width: 400px;
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .image-panel.active {
+            display: block;
+        }
+
+        .image-panel h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+
+        .generated-image {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .generated-image:hover {
+            transform: scale(1.02);
+        }
+
+        .image-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            color: #666;
+        }
+
+        .image-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .image-error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 2rem;
+            font-style: italic;
         }
 
         h1 {
@@ -159,9 +242,17 @@
             animation: wave-expand 2s infinite;
         }
 
-        .wave:nth-child(1) { animation-delay: 0s; }
-        .wave:nth-child(2) { animation-delay: 0.5s; }
-        .wave:nth-child(3) { animation-delay: 1s; }
+        .wave:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .wave:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .wave:nth-child(3) {
+            animation-delay: 1s;
+        }
 
         /* Topic Selection */
         .topic-selection {
@@ -280,29 +371,66 @@
 
         /* Animations */
         @keyframes listening-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         @keyframes talking-bounce {
-            0% { transform: translateX(-50%) scale(1); }
-            100% { transform: translateX(-50%) scale(1.02); }
+            0% {
+                transform: translateX(-50%) scale(1);
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1.02);
+            }
         }
 
         @keyframes blink {
-            0%, 90%, 100% { transform: scaleY(1); }
-            95% { transform: scaleY(0.1); }
+
+            0%,
+            90%,
+            100% {
+                transform: scaleY(1);
+            }
+
+            95% {
+                transform: scaleY(0.1);
+            }
         }
 
         @keyframes talk {
-            0% { height: 15px; width: 35px; }
-            100% { height: 25px; width: 45px; }
+            0% {
+                height: 15px;
+                width: 35px;
+            }
+
+            100% {
+                height: 25px;
+                width: 45px;
+            }
         }
 
         @keyframes look-around {
-            0%, 100% { transform: translate(6px, 6px); }
-            25% { transform: translate(4px, 6px); }
-            75% { transform: translate(8px, 6px); }
+
+            0%,
+            100% {
+                transform: translate(6px, 6px);
+            }
+
+            25% {
+                transform: translate(4px, 6px);
+            }
+
+            75% {
+                transform: translate(8px, 6px);
+            }
         }
 
         @keyframes wave-expand {
@@ -311,6 +439,7 @@
                 height: 180px;
                 opacity: 0.8;
             }
+
             100% {
                 width: 300px;
                 height: 300px;
@@ -319,8 +448,15 @@
         }
 
         @keyframes record-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
         }
 
         /* New states for WebSocket integration */
@@ -344,6 +480,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -360,58 +497,77 @@
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Nani - Your Hindi Coach</h1>
-        <p class="subtitle">Learn Hindi through mythological stories</p>
+    <div class="main-wrapper">
+        <div class="container">
+            <h1>Nani - Your Hindi Coach</h1>
+            <p class="subtitle">Learn Hindi through mythological stories</p>
 
-        <!-- AI Character -->
-        <div class="ai-character" id="aiCharacter">
-            <div class="character-face">
-                <div class="eye left">
-                    <div class="pupil"></div>
-                </div>
-                <div class="eye right">
-                    <div class="pupil"></div>
-                </div>
-                <div class="mouth"></div>
+            <!-- AI Character -->
+            <div class="ai-character" id="aiCharacter">
+                <div class="character-face">
+                    <div class="eye left">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="eye right">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="mouth"></div>
 
-                <!-- Sound waves for listening state -->
-                <div class="sound-waves" style="display: none;">
-                    <div class="wave"></div>
-                    <div class="wave"></div>
-                    <div class="wave"></div>
+                    <!-- Sound waves for listening state -->
+                    <div class="sound-waves" style="display: none;">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic Selection -->
+            <div class="topic-selection" id="topicSelection">
+                <h3>Choose a topic to learn:</h3>
+                <div class="topic-buttons">
+                    <button class="topic-button" data-topic="animals">🦁 Animals</button>
+                    <button class="topic-button" data-topic="birds">🦅 Birds</button>
+                    <button class="topic-button" data-topic="nature">🌳 Nature</button>
+                    <button class="topic-button" data-topic="colors">🌈 Colors</button>
+                    <button class="topic-button" data-topic="family">👨‍👩‍👧‍👦 Family</button>
+                    <button class="topic-button" data-topic="emotions">😊 Emotions</button>
+                </div>
+                <p class="topic-hint">Select a topic to start learning Hindi vocabulary with Nani!</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls" id="voiceControls" style="display: none;">
+                <button class="record-button" id="recordButton">
+                    <span id="buttonText">🎤<br>Record</span>
+                </button>
+            </div>
+
+            <div class="spacebar-hint" id="spacebarHint" style="display: none;">Press SPACEBAR to start/stop recording
+            </div>
+
+            <!-- Status -->
+            <div class="status" id="status">
+                <div class="status-item system">
+                    <strong>Welcome:</strong> Choose a topic above to start learning Hindi vocabulary with Nani!
                 </div>
             </div>
         </div>
 
-                <!-- Topic Selection -->
-        <div class="topic-selection" id="topicSelection">
-            <h3>Choose a topic to learn:</h3>
-            <div class="topic-buttons">
-                <button class="topic-button" data-topic="animals">🦁 Animals</button>
-                <button class="topic-button" data-topic="birds">🦅 Birds</button>
-                <button class="topic-button" data-topic="nature">🌳 Nature</button>
-                <button class="topic-button" data-topic="colors">🌈 Colors</button>
-                <button class="topic-button" data-topic="family">👨‍👩‍👧‍👦 Family</button>
-                <button class="topic-button" data-topic="emotions">😊 Emotions</button>
-            </div>
-            <p class="topic-hint">Select a topic to start learning Hindi vocabulary with Nani!</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls" id="voiceControls" style="display: none;">
-            <button class="record-button" id="recordButton">
-                <span id="buttonText">🎤<br>Record</span>
-            </button>
-        </div>
-
-        <div class="spacebar-hint" id="spacebarHint" style="display: none;">Press SPACEBAR to start/stop recording</div>
-
-        <!-- Status -->
-        <div class="status" id="status">
-            <div class="status-item system">
-                <strong>Welcome:</strong> Choose a topic above to start learning Hindi vocabulary with Nani!
+        <!-- Image Panel -->
+        <div class="image-panel" id="imagePanel">
+            <h3>Visual Learning</h3>
+            <div id="imageContainer">
+                <div class="image-loading" id="imageLoading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Generating image...</p>
+                </div>
+                <div class="image-error" id="imageError" style="display: none;">
+                    <p>Failed to generate image</p>
+                </div>
+                <img class="generated-image" id="generatedImage" style="display: none;" alt="Generated learning image">
             </div>
         </div>
     </div>
@@ -435,9 +591,10 @@
 
         // DOM elements
         let recordButton, status, buttonText, aiCharacter, soundWaves, topicSelection, voiceControls, spacebarHint;
+        let imagePanel, imageContainer, imageLoading, imageError, generatedImage;
 
         // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('🚀 Initializing AI Tutor with WebSocket support');
 
             // Initialize DOM elements
@@ -462,11 +619,17 @@
             topicSelection = document.getElementById('topicSelection');
             voiceControls = document.getElementById('voiceControls');
             spacebarHint = document.getElementById('spacebarHint');
+            imagePanel = document.getElementById('imagePanel');
+            imageContainer = document.getElementById('imageContainer');
+            imageLoading = document.getElementById('imageLoading');
+            imageError = document.getElementById('imageError');
+            generatedImage = document.getElementById('generatedImage');
 
             console.log('📋 DOM elements initialized:', {
                 recordButton: !!recordButton,
                 topicSelection: !!topicSelection,
-                voiceControls: !!voiceControls
+                voiceControls: !!voiceControls,
+                imagePanel: !!imagePanel
             });
         }
 
@@ -514,6 +677,8 @@
                 conversationActive = false;
                 addStatusMessage('system', '👋 Conversation ended. Choose a new topic to continue learning!');
                 setCharacterState('');
+                // Hide image panel
+                hideImagePanel();
                 // Show topic selection again
                 resetToTopicSelection();
             });
@@ -523,6 +688,9 @@
                 addStatusMessage('ai', data.response);
                 setCharacterState('talking');
                 // The audio will be handled by ElevenLabs directly
+
+                // Generate image based on AI response
+                generateImageFromResponse(data.response);
             });
 
             socket.on('user_transcript', (data) => {
@@ -572,51 +740,51 @@
                     sampleRate: 16000
                 }
             })
-            .then(stream => {
-                audioStream = stream;
+                .then(stream => {
+                    audioStream = stream;
 
-                // Initialize MediaRecorder for streaming
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm;codecs=opus'
+                    // Initialize MediaRecorder for streaming
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: 'audio/webm;codecs=opus'
+                    });
+
+                    // Handle data available for real-time streaming
+                    mediaRecorder.ondataavailable = event => {
+                        if (event.data.size > 0 && conversationActive) {
+                            // Convert to base64 and stream immediately for ElevenLabs
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                const base64Audio = reader.result.split(',')[1];
+                                streamAudioChunk(base64Audio);
+                            };
+                            reader.readAsDataURL(event.data);
+                        } else if (event.data.size > 0) {
+                            // For Sarvam, collect chunks as before
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        if (!conversationActive && audioChunks.length > 0) {
+                            // Sarvam integration - send complete audio
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                            audioChunks = [];
+
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                                const base64Audio = reader.result.split(',')[1];
+                                sendAudioToServer(base64Audio);
+                            };
+                            reader.readAsDataURL(audioBlob);
+                        }
+                    };
+
+                    addStatusMessage('system', '🎤 Microphone access granted! Ready to chat.');
+                })
+                .catch(err => {
+                    addStatusMessage('system', '❌ Microphone access denied. Please allow microphone access to use the voice assistant.');
+                    console.error('Error accessing microphone:', err);
                 });
-
-                // Handle data available for real-time streaming
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0 && conversationActive) {
-                        // Convert to base64 and stream immediately for ElevenLabs
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const base64Audio = reader.result.split(',')[1];
-                            streamAudioChunk(base64Audio);
-                        };
-                        reader.readAsDataURL(event.data);
-                    } else if (event.data.size > 0) {
-                        // For Sarvam, collect chunks as before
-                        audioChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    if (!conversationActive && audioChunks.length > 0) {
-                        // Sarvam integration - send complete audio
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        audioChunks = [];
-
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const base64Audio = reader.result.split(',')[1];
-                            sendAudioToServer(base64Audio);
-                        };
-                        reader.readAsDataURL(audioBlob);
-                    }
-                };
-
-                addStatusMessage('system', '🎤 Microphone access granted! Ready to chat.');
-            })
-            .catch(err => {
-                addStatusMessage('system', '❌ Microphone access denied. Please allow microphone access to use the voice assistant.');
-                console.error('Error accessing microphone:', err);
-            });
         }
 
         function setupEventListeners() {
@@ -664,7 +832,7 @@
 
             // Update button text based on state
             if (recordButton && buttonText) {
-                switch(state) {
+                switch (state) {
                     case 'listening':
                         buttonText.innerHTML = '🔴<br>Stop';
                         recordButton.classList.add('recording');
@@ -706,7 +874,7 @@
                 existing.remove();
             }
 
-            switch(status) {
+            switch (status) {
                 case 'connected':
                     connectionIndicator.innerHTML = '🟢 Connected';
                     connectionIndicator.style.backgroundColor = '#d4edda';
@@ -752,7 +920,7 @@
             statusItem.className = `status-item ${type}`;
 
             let label = '';
-            switch(type) {
+            switch (type) {
                 case 'user': label = 'You said:'; break;
                 case 'ai': label = 'AI Response:'; break;
                 case 'system': label = 'Status:'; break;
@@ -821,33 +989,33 @@
                 },
                 body: JSON.stringify({ audio: base64Audio })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    addStatusMessage('user', data.transcript);
-                    addStatusMessage('ai', data.ai_response);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addStatusMessage('user', data.transcript);
+                        addStatusMessage('ai', data.ai_response);
 
-                    // Set character to talking state and play audio
-                    setCharacterState('talking');
+                        // Set character to talking state and play audio
+                        setCharacterState('talking');
 
-                    if (data.response_audio) {
-                        playResponseAudio(data.response_audio);
+                        if (data.response_audio) {
+                            playResponseAudio(data.response_audio);
+                        } else {
+                            addStatusMessage('system', 'Warning: No audio response received');
+                            setCharacterState('');
+                        }
                     } else {
-                        addStatusMessage('system', 'Warning: No audio response received');
+                        addStatusMessage('system', 'Error: ' + data.error);
                         setCharacterState('');
                     }
-                } else {
-                    addStatusMessage('system', 'Error: ' + data.error);
+                    buttonText.innerHTML = '🎤<br>Record';
+                })
+                .catch(error => {
+                    addStatusMessage('system', 'Error sending audio: ' + error.message);
+                    buttonText.innerHTML = '🎤<br>Record';
                     setCharacterState('');
-                }
-                buttonText.innerHTML = '🎤<br>Record';
-            })
-            .catch(error => {
-                addStatusMessage('system', 'Error sending audio: ' + error.message);
-                buttonText.innerHTML = '🎤<br>Record';
-                setCharacterState('');
-                console.error('Error:', error);
-            });
+                    console.error('Error:', error);
+                });
         }
 
         function playResponseAudio(base64Audio) {
@@ -915,34 +1083,34 @@
                 },
                 body: JSON.stringify({ topic: topic })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('📝 Topic response received:', data);
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📝 Topic response received:', data);
 
-                if (data.success) {
-                    useElevenLabs = data.using_elevenlabs || false;
+                    if (data.success) {
+                        useElevenLabs = data.using_elevenlabs || false;
 
-                    if (useElevenLabs) {
-                        // Start ElevenLabs conversation via WebSocket
-                        console.log('🚀 Starting ElevenLabs conversation...');
-                        if (socket && isConnected) {
-                            socket.emit('start_conversation', { topic: topic });
+                        if (useElevenLabs) {
+                            // Start ElevenLabs conversation via WebSocket
+                            console.log('🚀 Starting ElevenLabs conversation...');
+                            if (socket && isConnected) {
+                                socket.emit('start_conversation', { topic: topic });
+                            } else {
+                                addStatusMessage('system', '❌ Not connected to server. Please refresh and try again.');
+                                return;
+                            }
                         } else {
-                            addStatusMessage('system', '❌ Not connected to server. Please refresh and try again.');
-                            return;
+                            // Traditional Sarvam flow
+                            showVoiceControls(topic);
                         }
                     } else {
-                        // Traditional Sarvam flow
-                        showVoiceControls(topic);
+                        addStatusMessage('system', '❌ Error setting topic: ' + data.error);
                     }
-                } else {
-                    addStatusMessage('system', '❌ Error setting topic: ' + data.error);
-                }
-            })
-            .catch(error => {
-                addStatusMessage('system', '❌ Error setting topic: ' + error.message);
-                console.error('Error:', error);
-            });
+                })
+                .catch(error => {
+                    addStatusMessage('system', '❌ Error setting topic: ' + error.message);
+                    console.error('Error:', error);
+                });
         }
 
         function showVoiceControls(topic) {
@@ -963,7 +1131,81 @@
             }
         }
 
+        // Image generation functions
+        function generateImageFromResponse(response) {
+            console.log('🎨 Generating image for response:', response);
+
+            // Show the image panel and loading state
+            showImagePanel();
+            showImageLoading();
+
+            // Call the create_image API
+            fetch('/create_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: response })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('🖼️ Image API response:', data);
+
+                    if (data.success && data.image_url) {
+                        displayGeneratedImage(data.image_url);
+                    } else {
+                        showImageError('Failed to generate image: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error generating image:', error);
+                    showImageError('Network error while generating image');
+                });
+        }
+
+        function showImagePanel() {
+            if (imagePanel) {
+                imagePanel.classList.add('active');
+            }
+        }
+
+        function hideImagePanel() {
+            if (imagePanel) {
+                imagePanel.classList.remove('active');
+            }
+        }
+
+        function showImageLoading() {
+            if (imageLoading) imageLoading.style.display = 'flex';
+            if (imageError) imageError.style.display = 'none';
+            if (generatedImage) generatedImage.style.display = 'none';
+        }
+
+        function showImageError(message) {
+            if (imageLoading) imageLoading.style.display = 'none';
+            if (imageError) {
+                imageError.style.display = 'block';
+                imageError.innerHTML = `<p>${message}</p>`;
+            }
+            if (generatedImage) generatedImage.style.display = 'none';
+        }
+
+        function displayGeneratedImage(imageUrl) {
+            if (imageLoading) imageLoading.style.display = 'none';
+            if (imageError) imageError.style.display = 'none';
+            if (generatedImage) {
+                generatedImage.src = imageUrl;
+                generatedImage.style.display = 'block';
+
+                // Add click handler to view full size
+                generatedImage.onclick = () => {
+                    window.open(imageUrl, '_blank');
+                };
+            }
+        }
+
 
     </script>
 </body>
+
 </html>

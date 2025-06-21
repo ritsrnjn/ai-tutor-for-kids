@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 import base64
 import os
 from dotenv import load_dotenv
+import image_util
 
 # Load environment variables
 load_dotenv()
@@ -24,6 +25,21 @@ USE_ELEVENLABS = os.getenv('USE_ELEVENLABS', 'false').lower() == 'true'
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/create_image', methods=['POST'])
+def create_image():
+    try:
+        data = request.json
+        prompt = data.get('prompt')
+        
+        if not prompt:
+            return jsonify({'error': 'No prompt provided'}), 400
+        
+        image_url = image_util.generate_image(prompt)
+        return jsonify({'success': True, 'image_url': image_url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/set_topic', methods=['POST'])
