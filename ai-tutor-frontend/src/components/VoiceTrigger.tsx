@@ -12,25 +12,33 @@ const VoiceTrigger: React.FC = () => {
     socketRef
   } = useApp();
 
-  const [topicInput, setTopicInput] = useState('');
-  const [showTopicInput, setShowTopicInput] = useState(!appState.currentTopic);
+  const [showTopicSelection, setShowTopicSelection] = useState(!appState.currentTopic);
   const [isRecording, setIsRecording] = useState(false);
   const [conversationStarted, setConversationStarted] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  // Handle topic submission
-  const handleTopicSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (topicInput.trim()) {
-      setTopic(topicInput.trim());
-      setShowTopicInput(false);
-    }
+  // Topic options
+  const topicOptions = [
+    { id: 'animals', label: 'Animals', emoji: '🐾', description: 'Learn about different animals' },
+    { id: 'plants', label: 'Plants', emoji: '🌱', description: 'Discover the world of plants' },
+    { id: 'planets', label: 'Planets', emoji: '🪐', description: 'Explore our solar system' },
+    { id: 'states', label: 'States', emoji: '🗺️', description: 'Learn about Indian states' },
+    { id: 'colors', label: 'Colors', emoji: '🎨', description: 'Learn different colors' },
+    { id: 'numbers', label: 'Numbers', emoji: '🔢', description: 'Practice counting and numbers' },
+    { id: 'food', label: 'Food', emoji: '🍽️', description: 'Learn about different foods' },
+    { id: 'family', label: 'Family', emoji: '👨‍👩‍👧‍👦', description: 'Family relationships and members' },
+    { id: 'body-parts', label: 'Body Parts', emoji: '👤', description: 'Learn about body parts' }
+  ];
+
+  // Handle topic selection
+  const handleTopicSelect = (topic: string) => {
+    setTopic(topic);
+    setShowTopicSelection(false);
   };
 
   const handleTopicChange = () => {
-    setShowTopicInput(true);
-    setTopicInput('');
+    setShowTopicSelection(true);
     setConversationStarted(false);
   };
 
@@ -167,22 +175,22 @@ const VoiceTrigger: React.FC = () => {
   return (
     <div className="voice-trigger-container">
       {/* Topic Selection */}
-      {showTopicInput ? (
+      {showTopicSelection ? (
         <div className="topic-section">
           <h3>Choose a Topic</h3>
-          <form onSubmit={handleTopicSubmit} className="topic-form">
-            <input
-              type="text"
-              value={topicInput}
-              onChange={(e) => setTopicInput(e.target.value)}
-              placeholder="Enter a topic (e.g., Colors, Animals, Numbers)"
-              className="topic-input"
-              autoFocus
-            />
-            <button type="submit" className="topic-submit">
-              Start Learning
-            </button>
-          </form>
+          <div className="topic-buttons-grid">
+            {topicOptions.map((topic) => (
+              <button
+                key={topic.id}
+                onClick={() => handleTopicSelect(topic.label)}
+                className="topic-button"
+                title={topic.description}
+              >
+                <div className="topic-emoji">{topic.emoji}</div>
+                <div className="topic-label">{topic.label}</div>
+              </button>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="conversation-controls">

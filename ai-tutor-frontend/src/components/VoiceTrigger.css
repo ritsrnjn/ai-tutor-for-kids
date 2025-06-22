@@ -300,9 +300,12 @@
 }
 
 .topic-section h3 {
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: white;
+  font-weight: 800;
+  font-size: 1.8rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
 }
 
 .topic-form {
@@ -578,5 +581,100 @@ elevenlabs-convai {
 
   .status-section {
     max-width: 350px;
+  }
+}
+
+/* Topic buttons grid */
+.topic-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1.5rem;
+  max-width: 500px;
+}
+
+.topic-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem 0.8rem;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  color: white;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 100px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.topic-button:hover {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  color: white;
+}
+
+.topic-button:active {
+  transform: translateY(-1px);
+}
+
+.topic-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.topic-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive design for topic buttons */
+@media (max-width: 768px) {
+  .topic-buttons-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    max-width: 400px;
+  }
+
+  .topic-button {
+    padding: 1rem 0.6rem;
+    min-height: 80px;
+  }
+
+    .topic-emoji {
+    font-size: 2rem;
+  }
+
+  .topic-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .topic-buttons-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    max-width: 300px;
+  }
+
+  .topic-button {
+    padding: 0.8rem 0.4rem;
+    min-height: 70px;
+  }
+
+    .topic-emoji {
+    font-size: 1.8rem;
+  }
+
+  .topic-label {
+    font-size: 0.9rem;
   }
 }
