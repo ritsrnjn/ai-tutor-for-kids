@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 import base64
 import os
 from dotenv import load_dotenv
@@ -26,6 +27,9 @@ import image_util
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
+
+# Enable CORS for all routes
+CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:3000"])
 
 # Initialize SocketIO for WebSocket support
 socketio = SocketIO(app, cors_allowed_origins="*")

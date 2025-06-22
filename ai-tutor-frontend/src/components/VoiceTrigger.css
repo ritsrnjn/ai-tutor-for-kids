@@ -1,0 +1,271 @@
+.voice-trigger-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  text-align: center;
+}
+
+/* Topic Selection Section */
+.topic-section {
+  width: 100%;
+  max-width: 300px;
+}
+
+.topic-section h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.topic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.topic-input {
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.topic-input:focus {
+  outline: none;
+  border-color: #8b45c0;
+}
+
+.topic-submit {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #8b45c0, #4facfe);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.topic-submit:hover {
+  transform: translateY(-2px);
+}
+
+/* Widget Container */
+.widget-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+elevenlabs-convai {
+  width: 100%;
+  height: 100%;
+  min-height: 500px; /* Adjust as needed */
+  border-radius: 12px;
+  overflow: hidden;
+  display: block;
+}
+
+/* Floating Change Topic Button */
+.floating-change-topic {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.2;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.widget-container:hover .floating-change-topic {
+  opacity: 1;
+}
+
+.floating-change-topic:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(1.1);
+}
+
+/* Remove styles that are no longer needed */
+.voice-widget-fullscreen {
+  display: none;
+}
+.widget-only-container {
+  display: contents; /* This prevents the container from affecting layout */
+}
+
+/* Widget Loading State */
+.widget-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(245, 245, 245, 0.8));
+  border-radius: 20px;
+  box-shadow:
+    0 20px 40px rgba(139, 69, 192, 0.2),
+    0 10px 20px rgba(79, 172, 254, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-height: 300px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(139, 69, 192, 0.2);
+  border-left: 4px solid #8b45c0;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.widget-loading p {
+  color: #666;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Learning Instructions */
+.learning-instructions {
+  background: rgba(139, 69, 192, 0.05);
+  border: 1px solid rgba(139, 69, 192, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.learning-instructions p {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.learning-instructions ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #555;
+}
+
+.learning-instructions li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Updated Status Section - Compact */
+.status-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.connection-status {
+  padding: 0.75rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05));
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.connection-status.disconnected {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Remove old voice trigger styles */
+.voice-trigger-wrapper,
+.voice-trigger-button,
+.pulse-ring,
+.trigger-core,
+.trigger-icon,
+.trigger-text,
+.voice-visualizer,
+.visualizer-bar {
+  display: none !important;
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes bounce {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-5px); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .voice-widget-wrapper {
+    margin: 1rem 0;
+  }
+
+  .convai-widget,
+  .widget-loading {
+    max-width: 350px;
+    min-height: 250px;
+  }
+
+  .learning-instructions {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .status-section {
+    max-width: 350px;
+  }
+}

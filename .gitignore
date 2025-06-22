@@ -53,3 +53,8 @@ logs/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Node / JS
+/ai-tutor-frontend/node_modules
+/ai-tutor-frontend/build
+/ai-tutor-frontend/dist/

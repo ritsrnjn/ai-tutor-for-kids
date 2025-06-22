@@ -1,4 +1,5 @@
 flask>=2.0.0
+flask-cors>=3.0.0
 pyaudio>=0.2.11
 numpy>=1.21.0
 webrtcvad>=2.0.10
@@ -19,3 +20,4 @@ requests
 # Image generation dependencies
 openai>=0.28.0
 Pillow>=8.0.0
+google-genai>=1.21.0
