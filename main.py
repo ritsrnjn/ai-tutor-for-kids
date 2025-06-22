@@ -4,7 +4,9 @@ from flask_cors import CORS
 import base64
 import os
 from dotenv import load_dotenv
-import image_util
+
+# Custom OpenAI integration for image generation
+import openai_integration
 
 # Load environment variables
 load_dotenv()
@@ -22,8 +24,6 @@ else:
     import elevenlabs_integration as ai_platform
     PLATFORM_NAME = "ElevenLabs"
     print("🎙️ Loading ElevenLabs integration...")
-
-import image_util
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
@@ -122,25 +122,48 @@ def end_session():
 
 @app.route('/create_image', methods=['POST'])
 def create_image():
-    """Generate an image based on AI response"""
+    """
+    Creates an image based on the agent's response using the enhanced workflow.
+    """
     try:
         data = request.json
-        ai_response = data.get('response')
+        agent_response = data.get('response')
+        print(f"\n[DEBUG] 1. Received in /create_image, Agent Response: {agent_response}\n")
 
-        if not ai_response:
-            return jsonify({'error': 'No AI response provided'}), 400
+        if not agent_response:
+            return jsonify({'error': 'No agent response provided'}), 400
 
-        # Generate image using the image utility
-        image_url, highlight_word = image_util.generate_relevant_image_and_highlight_word(ai_response)
+        # Phase 1: Create enhanced prompt and words
+        enhanced_data = openai_integration.create_enhanced_image_prompt(agent_response)
+        print(f"[DEBUG] Enhanced data received: {enhanced_data}")
+        if not enhanced_data or 'image_prompt' not in enhanced_data:
+            print(f"[DEBUG] ERROR: Invalid enhanced data: {enhanced_data}")
+            return jsonify({'error': 'Failed to create enhanced image prompt'}), 500
 
-        return jsonify({
+        image_prompt = enhanced_data.get('image_prompt')
+        english_word = enhanced_data.get('english_word')
+        hindi_word = enhanced_data.get('hindi_word')
+        print(f"[DEBUG] About to generate image with prompt: {image_prompt}")
+
+        # Phase 2: Generate image with the new prompt
+        image_url = openai_integration.generate_image_with_dalle(image_prompt)
+        print(f"[DEBUG] DALL-E returned image URL: {image_url}")
+        if not image_url:
+            print(f"[DEBUG] ERROR: DALL-E failed to generate image")
+            return jsonify({'error': 'Failed to generate image with DALL-E'}), 500
+
+        # Phase 3: Send all data to the frontend
+        response_data = {
             'success': True,
             'image_url': image_url,
-            'ai_response': ai_response,
-            'highlight_word': highlight_word
-        })
+            'english_word': english_word,
+            'hindi_word': hindi_word
+        }
+        print(f"[DEBUG] Sending response to frontend: {response_data}")
+        return jsonify(response_data)
 
     except Exception as e:
+        print(f"Error in /create_image: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/livekit_voice', methods=['POST'])
@@ -261,6 +284,7 @@ def handle_get_status():
 def setup_callbacks():
     """Set up callbacks based on chosen platform"""
     def on_agent_response(response):
+        print(f"Agent response received: {response}")
         socketio.emit('agent_response', {
             'response': response,
             'platform': PLATFORM
@@ -286,25 +310,11 @@ def setup_callbacks():
             on_session_end=on_session_end
         )
     else:
-        def on_agent_response_correction(original, corrected):
-            socketio.emit('agent_response_correction', {
-                'original': original,
-                'corrected': corrected,
-                'platform': PLATFORM
-            })
-
-        def on_latency_measurement(latency):
-            socketio.emit('latency_measurement', {
-                'latency': latency,
-                'platform': PLATFORM
-            })
-
-        ai_platform.elevenlabs_manager.set_callbacks(
+        # For ElevenLabs, the manager is the main point of interaction
+        # We can set the callbacks directly on the imported module if it's structured that way
+        ai_platform.set_callbacks(
             on_agent_response=on_agent_response,
-            on_user_transcript=on_user_transcript,
-            on_agent_response_correction=on_agent_response_correction,
-            on_latency_measurement=on_latency_measurement,
-            on_session_end=on_session_end
+            on_user_transcript=on_user_transcript
         )
 
 # Initialize callbacks

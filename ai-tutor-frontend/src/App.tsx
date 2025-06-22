@@ -19,7 +19,6 @@ const App: React.FC = () => {
             <div className="voice-section">
               <VoiceTrigger />
             </div>
-
             {/* Image Display */}
             <div className="image-section">
               <ImageDisplay />

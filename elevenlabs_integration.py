@@ -2,7 +2,7 @@ import os
 import signal
 import threading
 import time
-from typing import Optional, Callable
+from typing import Optional, Callable, List, Dict, Any
 from elevenlabs.client import ElevenLabs
 from elevenlabs.conversational_ai.conversation import Conversation
 from elevenlabs.conversational_ai.default_audio_interface import DefaultAudioInterface
@@ -24,6 +24,11 @@ class ElevenLabsManager:
         self.current_topic = None
         self.conversation_id = None
         self.is_session_active = False
+
+        # Transcript polling variables
+        self.polling_active = False
+        self.last_processed_message_index = -1
+        self.polling_thread = None
 
         # Callbacks for handling responses
         self.on_agent_response: Optional[Callable] = None
@@ -150,6 +155,33 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
             self.conversation.start_session()
             self.is_session_active = True
 
+            print(f"[DEBUG] Session started, checking for conversation ID...")
+            print(f"[DEBUG] Conversation object attributes: {dir(self.conversation)}")
+
+            # Get the conversation ID for transcript polling
+            # Note: The conversation ID might be available immediately or after a short delay
+            # We'll try to get it from the conversation object
+            if hasattr(self.conversation, 'conversation_id'):
+                self.conversation_id = self.conversation.conversation_id
+                print(f"[DEBUG] Found conversation_id: {self.conversation_id}")
+            elif hasattr(self.conversation, 'id'):
+                self.conversation_id = self.conversation.id
+                print(f"[DEBUG] Found id: {self.conversation_id}")
+            else:
+                print(f"[DEBUG] No conversation_id or id attribute found")
+
+            # Start transcript polling if we have a conversation ID
+            if self.conversation_id:
+                print(f"✅ Conversation ID obtained: {self.conversation_id}")
+                print("ℹ️  Live callbacks are working, transcript polling disabled")
+                # self.start_transcript_polling()  # Disabled since live callbacks work
+            else:
+                print("Warning: Could not get conversation ID immediately")
+                print("ℹ️  Will rely on live callbacks instead of transcript polling")
+                # print("Will try to get it from recent conversations after a delay...")
+                # Start polling with a delayed ID lookup
+                # self.start_transcript_polling_with_delay()  # Disabled
+
             # If we have a topic, send it as context
             if topic:
                 # Send topic context to the agent
@@ -161,7 +193,8 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
                 'success': True,
                 'message': f'Conversation started successfully',
                 'topic': self.current_topic,
-                'session_active': self.is_session_active
+                'session_active': self.is_session_active,
+                'conversation_id': self.conversation_id
             }
 
         except Exception as e:
@@ -176,6 +209,9 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
         End the current conversation session
         """
         try:
+            # Stop transcript polling first
+            self.stop_transcript_polling()
+
             if self.conversation and self.is_session_active:
                 self.conversation.end_session()
                 self.conversation_id = self.conversation.wait_for_session_end()
@@ -197,6 +233,8 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
 
         except Exception as e:
             self.is_session_active = False
+            # Make sure polling is stopped even if there's an error
+            self.stop_transcript_polling()
             return {
                 'success': False,
                 'error': str(e)
@@ -241,6 +279,151 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
                 'error': str(e)
             }
 
+    def start_transcript_polling(self):
+        """Start polling the conversation transcript for agent responses"""
+        if not self.conversation_id:
+            print("No conversation ID available for transcript polling")
+            return
+
+        self.polling_active = True
+        self.last_processed_message_index = -1
+
+        def poll_transcript():
+            while self.polling_active and self.is_session_active:
+                try:
+                    print(f"[POLLING] Checking transcript for conversation {self.conversation_id}")
+
+                    # Get the conversation details including transcript
+                    conversation_data = self.client.conversational_ai.conversations.get(
+                        conversation_id=self.conversation_id
+                    )
+
+                    transcript = conversation_data.transcript
+                    print(f"[POLLING] Found {len(transcript)} messages in transcript")
+
+                                        # Process new agent messages
+                    for i, message in enumerate(transcript):
+                        if (i > self.last_processed_message_index and
+                            message.role == 'agent' and
+                            message.message is not None and
+                            message.message.strip()):
+
+                            print(f"[TRANSCRIPT] New agent response: {message.message}")
+
+                            # Send to our image generation pipeline
+                            if self.on_agent_response:
+                                self.on_agent_response(message.message)
+
+                        # Always update the index to avoid reprocessing
+                        if i > self.last_processed_message_index:
+                            self.last_processed_message_index = i
+
+                    # Wait before next poll
+                    time.sleep(3)  # Poll every 3 seconds
+
+                except Exception as e:
+                    print(f"Error polling transcript: {e}")
+                    time.sleep(5)  # Wait longer on error
+
+        # Start polling in a background thread
+        self.polling_thread = threading.Thread(target=poll_transcript, daemon=True)
+        self.polling_thread.start()
+        print("Started transcript polling")
+
+    def start_transcript_polling_with_delay(self):
+        """Start polling with delayed conversation ID lookup"""
+        self.polling_active = True
+        self.last_processed_message_index = -1
+
+        def poll_with_delay():
+            # Wait a bit for the conversation to be created
+            time.sleep(5)
+
+            # Try to find the most recent conversation
+            if not self.conversation_id:
+                try:
+                    recent_conversations = self.get_recent_conversations(1)
+                    if recent_conversations:
+                        self.conversation_id = recent_conversations[0].conversation_id
+                        print(f"[POLLING] Found conversation ID from recent list: {self.conversation_id}")
+                    else:
+                        print("[POLLING] No recent conversations found")
+                        return
+                except Exception as e:
+                    print(f"[POLLING] Error getting recent conversations: {e}")
+                    return
+
+            # Now start normal polling
+            while self.polling_active and self.is_session_active:
+                try:
+                    if not self.conversation_id:
+                        break
+
+                    print(f"[POLLING] Checking transcript for conversation {self.conversation_id}")
+
+                    # Get the conversation details including transcript
+                    conversation_data = self.client.conversational_ai.conversations.get(
+                        conversation_id=self.conversation_id
+                    )
+
+                    transcript = conversation_data.transcript
+                    print(f"[POLLING] Found {len(transcript)} messages in transcript")
+
+                    # Process new agent messages
+                    for i, message in enumerate(transcript):
+                        if (i > self.last_processed_message_index and
+                            message.role == 'agent' and
+                            message.message is not None and
+                            message.message.strip()):
+
+                            print(f"[TRANSCRIPT] New agent response: {message.message}")
+
+                            # Send to our image generation pipeline
+                            if self.on_agent_response:
+                                self.on_agent_response(message.message)
+
+                        # Always update the index to avoid reprocessing
+                        if i > self.last_processed_message_index:
+                            self.last_processed_message_index = i
+
+                    # Wait before next poll
+                    time.sleep(3)  # Poll every 3 seconds
+
+                except Exception as e:
+                    print(f"Error polling transcript: {e}")
+                    time.sleep(5)  # Wait longer on error
+
+        # Start polling in a background thread
+        self.polling_thread = threading.Thread(target=poll_with_delay, daemon=True)
+        self.polling_thread.start()
+        print("Started transcript polling with delayed ID lookup")
+
+    def stop_transcript_polling(self):
+        """Stop polling the conversation transcript"""
+        self.polling_active = False
+        if self.polling_thread and self.polling_thread.is_alive():
+            self.polling_thread.join(timeout=1)
+        print("Stopped transcript polling")
+
+    def get_recent_conversations(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent conversations from ElevenLabs"""
+        try:
+            conversations_response = self.client.conversational_ai.conversations.list()
+            return conversations_response.conversations[:limit]
+        except Exception as e:
+            print(f"Error getting recent conversations: {e}")
+            return []
+
+    def get_conversation_details(self, conversation_id: str) -> Dict[str, Any]:
+        """Get detailed information about a specific conversation"""
+        try:
+            return self.client.conversational_ai.conversations.get(
+                conversation_id=conversation_id
+            )
+        except Exception as e:
+            print(f"Error getting conversation details: {e}")
+            return {}
+
     # Callback handlers
     def _handle_agent_response(self, response: str):
         """Handle agent response"""
@@ -249,8 +432,8 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
             self.on_agent_response(response)
 
     def _handle_agent_response_correction(self, original: str, corrected: str):
-        """Handle agent response correction"""
-        print(f"Agent correction: {original} -> {corrected}")
+        """Handle corrected agent response"""
+        print(f"Agent Correction: {original} -> {corrected}")
         if self.on_agent_response_correction:
             self.on_agent_response_correction(original, corrected)
 
@@ -262,17 +445,24 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
 
     def _handle_latency_measurement(self, latency: float):
         """Handle latency measurement"""
-        print(f"Latency: {latency}ms")
+        print(f"Latency: {latency}s")
         if self.on_latency_measurement:
             self.on_latency_measurement(latency)
 
 
-# Global instance for backward compatibility
+# Create a single, shared instance of the manager
 elevenlabs_manager = ElevenLabsManager()
 
-# Main API functions for ElevenLabs integration
+# --- Public API ---
+def set_callbacks(on_agent_response: Callable, on_user_transcript: Callable):
+    """Set the main callbacks for the integration"""
+    elevenlabs_manager.set_callbacks(
+        on_agent_response=on_agent_response,
+        on_user_transcript=on_user_transcript
+    )
+
 def set_topic(topic: str) -> dict:
-    """Set the topic for the current learning session"""
+    """Set the topic for the conversation"""
     return elevenlabs_manager.create_or_update_agent(topic)
 
 def start_conversation(topic: str = None) -> dict:
@@ -284,17 +474,17 @@ def end_conversation() -> dict:
     return elevenlabs_manager.end_conversation_session()
 
 def get_status() -> dict:
-    """Get the current conversation status"""
+    """Get the current status of the conversation"""
     return elevenlabs_manager.get_conversation_status()
 
 def send_audio(audio_data: bytes) -> dict:
     """Send audio data to the active conversation"""
     return elevenlabs_manager.send_audio_to_conversation(audio_data)
 
-# Set up signal handler for clean shutdown
+
+# Graceful shutdown
 def signal_handler(sig, frame):
-    """Handle interrupt signals"""
-    print("\nShutting down conversation...")
+    print("Signal received, shutting down gracefully...")
     elevenlabs_manager.end_conversation_session()
     exit(0)
 

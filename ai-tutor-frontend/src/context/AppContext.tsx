@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode, useRef } from 'react';
 import io, { Socket } from 'socket.io-client';
-import { AppState, VoiceState, AvatarState, AppContextType } from '../types';
+import { AppState, VoiceState, AvatarState, AppContextType, ImageState } from '../types';
 
 // Action types
 type AppAction =
@@ -9,11 +9,11 @@ type AppAction =
   | { type: 'SET_TOPIC'; payload: string }
   | { type: 'SET_AI_RESPONSE'; payload: string }
   | { type: 'SET_USER_TRANSCRIPT'; payload: string }
-  | { type: 'SET_IMAGE'; payload: { url: string; word: string } }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_VOICE_STATE'; payload: Partial<VoiceState> }
-  | { type: 'SET_AVATAR_STATE'; payload: Partial<AvatarState> };
+  | { type: 'SET_AVATAR_STATE'; payload: Partial<AvatarState> }
+  | { type: 'SET_IMAGE_STATE'; payload: Partial<ImageState> };
 
 // Initial states
 const initialAppState: AppState = {
@@ -22,8 +22,6 @@ const initialAppState: AppState = {
   currentTopic: null,
   aiResponse: null,
   userTranscript: null,
-  imageUrl: null,
-  highlightWord: null,
   isLoading: false,
   error: null,
 };
@@ -41,6 +39,12 @@ const initialAvatarState: AvatarState = {
   animation: 'idle',
 };
 
+const initialImageState: ImageState = {
+  imageUrl: null,
+  englishWord: null,
+  hindiWord: null,
+};
+
 // Reducer
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
@@ -54,12 +58,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return { ...state, aiResponse: action.payload };
     case 'SET_USER_TRANSCRIPT':
       return { ...state, userTranscript: action.payload };
-    case 'SET_IMAGE':
-      return {
-        ...state,
-        imageUrl: action.payload.url,
-        highlightWord: action.payload.word
-      };
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
     case 'SET_ERROR':
@@ -82,6 +80,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [appState, dispatch] = useReducer(appReducer, initialAppState);
   const [voiceState, setVoiceStateLocal] = React.useState<VoiceState>(initialVoiceState);
   const [avatarState, setAvatarStateLocal] = React.useState<AvatarState>(initialAvatarState);
+  const [imageState, setImageStateLocal] = React.useState<ImageState>(initialImageState);
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const socketRef = useRef<Socket | null>(socket);
 
@@ -101,9 +100,29 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.log('Disconnected from server');
     });
 
-    newSocket.on('agent_response', (data: { response: string }) => {
+    newSocket.on('agent_response', async (data: { response: string }) => {
+      console.log('%cAGENT RESPONSE RECEIVED ON FRONTEND:', 'color: #10b981; font-weight: bold;', data);
       dispatch({ type: 'SET_AI_RESPONSE', payload: data.response });
       setAvatarStateLocal(prev => ({ ...prev, isSpeaking: true, animation: 'talking' }));
+
+      // New: Fetch image from our backend
+      try {
+        const res = await fetch('http://localhost:5001/create_image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ response: data.response }),
+        });
+        const imageData = await res.json();
+        if (imageData.success) {
+          setImageStateLocal({
+            imageUrl: imageData.image_url,
+            englishWord: imageData.english_word,
+            hindiWord: imageData.hindi_word,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to create image:', error);
+      }
     });
 
     newSocket.on('user_transcript', (data: { transcript: string }) => {
@@ -126,6 +145,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const setAvatarState = (state: Partial<AvatarState>) => {
     setAvatarStateLocal(prev => ({ ...prev, ...state }));
+  };
+
+  const setImageState = (state: Partial<ImageState>) => {
+    setImageStateLocal(prev => ({ ...prev, ...state }));
   };
 
   const startListening = () => {
@@ -171,39 +194,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
-  const createImage = async (response: string) => {
-    try {
-      const result = await fetch('http://localhost:5001/create_image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ response }),
-      });
-
-      if (!result.ok) throw new Error('Failed to create image');
-
-      const data = await result.json();
-      dispatch({
-        type: 'SET_IMAGE',
-        payload: { url: data.image_url, word: data.highlight_word }
-      });
-    } catch (error) {
-      console.error('Error creating image:', error);
-    }
-  };
-
   const contextValue: AppContextType = {
     appState,
     voiceState,
     avatarState,
+    imageState,
     socket,
     socketRef,
     dispatch,
     setVoiceState,
     setAvatarState,
+    setImageState,
     startListening,
     stopListening,
     setTopic,
-    createImage,
   };
 
   return (

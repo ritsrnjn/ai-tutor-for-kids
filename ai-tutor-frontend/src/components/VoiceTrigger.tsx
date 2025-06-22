@@ -2,53 +2,22 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import './VoiceTrigger.css';
 
-// Declare ElevenLabs types to avoid TypeScript errors
-declare global {
-  interface Window {
-    ElevenLabsConvAI?: any;
-  }
-}
-
 const VoiceTrigger: React.FC = () => {
   const {
     appState,
+    voiceState,
     setTopic,
+    startListening,
+    stopListening,
     socketRef
   } = useApp();
 
   const [topicInput, setTopicInput] = useState('');
   const [showTopicInput, setShowTopicInput] = useState(!appState.currentTopic);
-  const [widgetLoaded, setWidgetLoaded] = useState(false);
-
-  // Load ElevenLabs ConvAI script (matching the working HTML implementation)
-  useEffect(() => {
-    const loadElevenLabsScript = () => {
-      // Check if script already exists
-      if (document.querySelector('script[src*="convai-widget-embed"]')) {
-        console.log('ElevenLabs script already loaded');
-        setWidgetLoaded(true);
-        return;
-      }
-
-      console.log('Loading ElevenLabs ConvAI script...');
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
-      script.async = true;
-      script.type = 'text/javascript';
-      script.onload = () => {
-        console.log('ElevenLabs script loaded successfully');
-        setWidgetLoaded(true);
-      };
-      script.onerror = (error) => {
-        console.error('Failed to load ElevenLabs ConvAI script:', error);
-        setWidgetLoaded(true); // Still show the widget container
-      };
-
-      document.head.appendChild(script);
-    };
-
-    loadElevenLabsScript();
-  }, []);
+  const [isRecording, setIsRecording] = useState(false);
+  const [conversationStarted, setConversationStarted] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Handle topic submission
   const handleTopicSubmit = (e: React.FormEvent) => {
@@ -56,41 +25,144 @@ const VoiceTrigger: React.FC = () => {
     if (topicInput.trim()) {
       setTopic(topicInput.trim());
       setShowTopicInput(false);
-
-      // Send topic to backend via WebSocket
-      if (socketRef.current?.connected) {
-        socketRef.current.emit('topic_selected', { topic: topicInput.trim() });
-      }
     }
   };
 
   const handleTopicChange = () => {
     setShowTopicInput(true);
     setTopicInput('');
+    setConversationStarted(false);
   };
 
-  // Add keyboard shortcut to change topic (Ctrl+T or Cmd+T)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 't' && !showTopicInput) {
-        e.preventDefault();
-        handleTopicChange();
+  // Start conversation with backend
+  const handleStartConversation = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/start_session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: appState.currentTopic }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setConversationStarted(true);
+        console.log('Conversation started successfully:', result);
+
+        // Start listening for audio
+        startAudioRecording();
+      } else {
+        console.error('Failed to start conversation:', result);
       }
-    };
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+    }
+  };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showTopicInput]);
+  // Stop conversation with backend
+  const handleStopConversation = async () => {
+    try {
+      stopAudioRecording();
 
-    // Optional: Handle ConvAI events (can be added later if needed)
+      const response = await fetch('http://localhost:5001/end_session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const result = await response.json();
+      setConversationStarted(false);
+      console.log('Conversation ended:', result);
+    } catch (error) {
+      console.error('Error ending conversation:', error);
+    }
+  };
+
+  // Audio recording functions
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        sendAudioToBackend(audioBlob);
+        audioChunksRef.current = [];
+      };
+
+      // Record in chunks of 3 seconds
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      // Stop and restart recording every 3 seconds for continuous audio
+      const recordingInterval = setInterval(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+          setTimeout(() => {
+            if (conversationStarted && mediaRecorder.state === 'inactive') {
+              audioChunksRef.current = [];
+              mediaRecorder.start();
+            }
+          }, 100);
+        }
+      }, 3000);
+
+      // Store interval for cleanup
+      (mediaRecorder as any).recordingInterval = recordingInterval;
+
+    } catch (error) {
+      console.error('Error starting audio recording:', error);
+    }
+  };
+
+  const stopAudioRecording = () => {
+    if (mediaRecorderRef.current) {
+      const mediaRecorder = mediaRecorderRef.current;
+
+      // Clear interval
+      if ((mediaRecorder as any).recordingInterval) {
+        clearInterval((mediaRecorder as any).recordingInterval);
+      }
+
+      if (mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+
+      // Stop all tracks
+      mediaRecorder.stream?.getTracks().forEach(track => track.stop());
+    }
+    setIsRecording(false);
+  };
+
+  const sendAudioToBackend = async (audioBlob: Blob) => {
+    try {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Audio = reader.result as string;
+        const audioData = base64Audio.split(',')[1]; // Remove data:audio/wav;base64, prefix
+
+        if (socketRef.current?.connected) {
+          socketRef.current.emit('audio_chunk', { audio: audioData });
+        }
+      };
+      reader.readAsDataURL(audioBlob);
+    } catch (error) {
+      console.error('Error sending audio to backend:', error);
+    }
+  };
+
+  // Cleanup on unmount
   useEffect(() => {
-    if (!widgetLoaded) return;
-
-    console.log('ElevenLabs ConvAI widget should be loaded and ready');
-
-    // The widget will handle all voice interactions automatically
-    // No manual event handling needed for basic functionality
-  }, [widgetLoaded]);
+    return () => {
+      stopAudioRecording();
+    };
+  }, []);
 
   return (
     <div className="voice-trigger-container">
@@ -113,16 +185,39 @@ const VoiceTrigger: React.FC = () => {
           </form>
         </div>
       ) : (
-        <div className="widget-container">
-          <elevenlabs-convai
-            agent-id="agent_01jy9sz4gnew0vedv885xsrse1"
-          ></elevenlabs-convai>
+        <div className="conversation-controls">
+          <div className="topic-display">
+            <h3>Learning about: {appState.currentTopic}</h3>
+          </div>
+
+          {!conversationStarted ? (
+            <button
+              onClick={handleStartConversation}
+              className="start-conversation-btn"
+              disabled={!appState.currentTopic}
+            >
+              🎤 Start Conversation with Nani
+            </button>
+          ) : (
+            <div className="conversation-active">
+              <div className="recording-indicator">
+                <div className={`recording-dot ${isRecording ? 'active' : ''}`}></div>
+                <span>Conversation Active</span>
+              </div>
+              <button
+                onClick={handleStopConversation}
+                className="stop-conversation-btn"
+              >
+                🛑 End Conversation
+              </button>
+            </div>
+          )}
+
           <button
             onClick={handleTopicChange}
-            className="floating-change-topic"
-            title="Change Topic (Ctrl+T / Cmd+T)"
+            className="change-topic-btn"
           >
-            ⚙️
+            ⚙️ Change Topic
           </button>
         </div>
       )}

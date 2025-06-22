@@ -1,11 +1,11 @@
+import { Socket } from 'socket.io-client';
+
 export interface AppState {
   isListening: boolean;
   isConnected: boolean;
   currentTopic: string | null;
   aiResponse: string | null;
   userTranscript: string | null;
-  imageUrl: string | null;
-  highlightWord: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -23,13 +23,17 @@ export interface AvatarState {
   animation: 'idle' | 'talking' | 'gesturing' | 'celebrating';
 }
 
+export interface ImageState {
+  imageUrl: string | null;
+  englishWord: string | null;
+  hindiWord: string | null;
+}
+
 export interface ConversationMessage {
   id: string;
   type: 'user' | 'ai';
   content: string;
   timestamp: Date;
-  imageUrl?: string;
-  highlightWord?: string;
 }
 
 export interface LearningSession {
@@ -41,23 +45,19 @@ export interface LearningSession {
 }
 
 export interface AppContextType {
-  // State
   appState: AppState;
   voiceState: VoiceState;
   avatarState: AvatarState;
-  socket: any | null;
-  socketRef: React.RefObject<any>;
-
-  // Actions
+  imageState: ImageState;
+  socket: Socket | null;
+  socketRef: React.RefObject<Socket | null>;
   dispatch: React.Dispatch<any>;
   setVoiceState: (state: Partial<VoiceState>) => void;
   setAvatarState: (state: Partial<AvatarState>) => void;
-
-  // Methods
+  setImageState: (state: Partial<ImageState>) => void;
   startListening: () => void;
   stopListening: () => void;
-  setTopic: (topic: string) => void;
-  createImage: (response: string) => void;
+  setTopic: (topic: string) => Promise<void>;
 }
 
 // Declare ElevenLabs ConvAI custom element
