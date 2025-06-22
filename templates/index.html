@@ -18,6 +18,69 @@
             overflow-x: hidden;
         }
 
+        /* Platform Selector */
+        .platform-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .platform-selector h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .platform-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .platform-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .platform-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .platform-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .platform-btn.elevenlabs {
+            border-color: #4facfe;
+        }
+
+        .platform-btn.elevenlabs.active {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .platform-btn.livekit {
+            border-color: #4caf50;
+        }
+
+        .platform-btn.livekit.active {
+            background: linear-gradient(135deg, #4caf50, #8bc34a);
+        }
+
         .main-container {
             display: flex;
             min-height: 100vh;
@@ -40,6 +103,244 @@
             align-items: center;
             justify-content: center;
             min-height: 500px;
+        }
+
+        /* Style the ElevenLabs widget container */
+        elevenlabs-convai {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        /* LiveKit Voice Interface Styles */
+        .livekit-voice-interface {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .voice-trigger-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .voice-trigger-button {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            user-select: none;
+        }
+
+        .voice-trigger-button:hover {
+            transform: scale(1.05);
+        }
+
+        .voice-trigger-button.active {
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.5) 0%, rgba(79, 172, 254, 0.3) 50%, transparent 70%);
+        }
+
+        .voice-trigger-button.listening {
+            animation: listening-pulse 2s ease-in-out infinite;
+        }
+
+        .voice-trigger-button.processing {
+            animation: processing-spin 1.5s linear infinite;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            animation: pulse-ring 2s cubic-bezier(0.25, 0, 0, 1) infinite;
+        }
+
+        .pulse-ring-2 {
+            animation-delay: 0.5s;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .pulse-ring-3 {
+            animation-delay: 1s;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .trigger-core {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 0 30px rgba(255, 255, 255, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            color: #667eea;
+        }
+
+        .voice-trigger-button:hover .trigger-core {
+            box-shadow:
+                0 0 50px rgba(255, 255, 255, 0.5),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .voice-trigger-button.active .trigger-core {
+            background: linear-gradient(135deg, #ff6b6b, #4facfe);
+            color: white;
+            box-shadow:
+                0 0 60px rgba(255, 107, 107, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .voice-trigger-button.processing .trigger-core {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            box-shadow:
+                0 0 60px rgba(240, 147, 251, 0.8),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .trigger-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .voice-trigger-button.active .trigger-icon {
+            animation: bounce 0.6s ease infinite alternate;
+        }
+
+        .trigger-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 0.2rem;
+        }
+
+        .trigger-subtitle {
+            font-size: 0.9rem;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        .voice-visualizer {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .voice-trigger-button.listening .voice-visualizer {
+            opacity: 1;
+        }
+
+        .visualizer-bar {
+            width: 3px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 2px;
+            animation: visualizer 1.5s ease-in-out infinite;
+        }
+
+        .visualizer-bar:nth-child(2) { animation-delay: 0.1s; }
+        .visualizer-bar:nth-child(3) { animation-delay: 0.2s; }
+        .visualizer-bar:nth-child(4) { animation-delay: 0.3s; }
+        .visualizer-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        .voice-status {
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-top: 1rem;
+        }
+
+        .platform-info {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .platform-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .platform-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        /* Animations */
+        @keyframes listening-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes processing-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes visualizer {
+            0%, 100% { height: 20px; }
+            50% { height: 40px; }
         }
 
         /* Voice Trigger Button Styles */
@@ -336,28 +637,48 @@
 </head>
 <body>
     <div class="main-container">
-        <!-- Left Side - Custom Voice Trigger Button -->
+        <!-- Left Side - Platform-specific Widget -->
         <div class="left-widget">
-            <!-- Custom Voice Trigger Button -->
-            <div class="voice-trigger-container">
-                <div class="voice-trigger-button" id="voiceTrigger">
-                    <div class="pulse-ring"></div>
-                    <div class="pulse-ring pulse-ring-2"></div>
-                    <div class="pulse-ring pulse-ring-3"></div>
-                    <div class="trigger-core">
-                        <div class="trigger-icon">🎤</div>
-                        <div class="trigger-text">Tap to Talk</div>
+            {% if platform == 'elevenlabs' %}
+                <!-- ElevenLabs ConvAI Embed -->
+                <elevenlabs-convai agent-id="agent_01jy9sz4gnew0vedv885xsrse1"></elevenlabs-convai>
+                        {% else %}
+                <!-- LiveKit Voice Interface -->
+                <div class="livekit-voice-interface">
+                    <!-- Voice Trigger Button -->
+                    <div class="voice-trigger-container">
+                        <div class="voice-trigger-button" id="livekitVoiceTrigger">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring pulse-ring-2"></div>
+                            <div class="pulse-ring pulse-ring-3"></div>
+                            <div class="trigger-core">
+                                <div class="trigger-icon">🎤</div>
+                                <div class="trigger-text">Tap to Talk</div>
+                                <div class="trigger-subtitle">नानी से बात करें</div>
+                            </div>
+                            <div class="voice-visualizer">
+                                <div class="visualizer-bar"></div>
+                                <div class="visualizer-bar"></div>
+                                <div class="visualizer-bar"></div>
+                                <div class="visualizer-bar"></div>
+                                <div class="visualizer-bar"></div>
+                            </div>
+                        </div>
+                        <div class="voice-status" id="livekitVoiceStatus">Ready to chat with Nani in Hindi</div>
                     </div>
-                    <div class="voice-visualizer">
-                        <div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div>
-                        <div class="visualizer-bar"></div>
+
+                    <!-- Platform Info -->
+                    <div class="platform-info">
+                        <div class="platform-badge">{{ platform_name }}</div>
+                        <p class="platform-description">Hindi Voice Assistant powered by Sarvam AI</p>
+
+                        <!-- Debug Test Button -->
+                        <button id="testLivekitBtn" style="margin-top: 1rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.2); border: none; border-radius: 10px; color: white; cursor: pointer;">
+                            Test LiveKit (Debug)
+                        </button>
                     </div>
                 </div>
-                <div class="voice-status" id="voiceStatus">Ready to chat with Nani</div>
-            </div>
+            {% endif %}
         </div>
 
         <!-- Right Side - Space for Image Widget -->
@@ -369,7 +690,10 @@
     <!-- Connection Status Badge (moved to bottom left) -->
     <div class="connection-status" id="connectionBadge">🔄 Connecting...</div>
 
-    <!-- Custom Voice Trigger Button (No external dependencies needed) -->
+    <!-- ElevenLabs ConvAI Widget (only load for ElevenLabs platform) -->
+    {% if platform == 'elevenlabs' %}
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+    {% endif %}
 
     <!-- Socket.IO Client Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
@@ -380,149 +704,84 @@
     <script>
         // WebSocket and audio streaming variables
         let socket;
+        let isConnected = false;
+        let connectionBadge;
+
+        // LiveKit-specific variables
+        let livekitVoiceTrigger;
+        let livekitVoiceStatus;
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
-        let currentTopic = null;
-        let isConnected = false;
-        let conversationActive = false;
-        let useElevenLabs = false;
-        let audioStream;
-        let audioContext;
-        let audioBuffer = [];
-
-        // DOM elements
-        let voiceTrigger, voiceStatus, connectionBadge;
-        let isListening = false;
         let currentState = 'idle'; // idle, listening, processing, speaking
+        let platform = '{{ platform }}';
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing AI Tutor with Custom Voice Trigger');
+            console.log('🚀 Initializing AI Tutor with platform:', platform);
 
             // Initialize DOM elements
-            initializeDOMElements();
+            connectionBadge = document.getElementById('connectionBadge');
+
+                        if (platform === 'livekit') {
+                livekitVoiceTrigger = document.getElementById('livekitVoiceTrigger');
+                livekitVoiceStatus = document.getElementById('livekitVoiceStatus');
+
+                // Setup LiveKit voice interface
+                setupLivekitVoiceInterface();
+                initializeAudioRecording();
+
+                // Setup debug test button
+                const testBtn = document.getElementById('testLivekitBtn');
+                if (testBtn) {
+                    testBtn.addEventListener('click', () => {
+                        console.log('🧪 Testing LiveKit endpoint...');
+                        updateLivekitVoiceStatus('Testing LiveKit connection...');
+
+                        fetch('/livekit_voice', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ audio: 'test_data' })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('✅ Test response:', data);
+                            updateLivekitVoiceStatus('Test successful: ' + data.response);
+
+                            // Emit for image generation
+                            if (socket && isConnected) {
+                                socket.emit('agent_response', { response: data.response });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Test failed:', error);
+                            updateLivekitVoiceStatus('Test failed: ' + error.message);
+                        });
+                    });
+                }
+            }
 
             // Setup WebSocket connection
             initializeWebSocket();
 
-            // Setup audio recording
-            initializeAudioRecording();
-
-            // Setup voice trigger button
-            setupVoiceTrigger();
-
-            // Auto-start conversation for simplified flow
-            setTimeout(() => {
-                if (socket && isConnected) {
-                    socket.emit('start_conversation', { topic: 'general' });
-                }
-            }, 2000);
+            console.log('📋 Initialization complete');
         });
 
-        function initializeDOMElements() {
-            voiceTrigger = document.getElementById('voiceTrigger');
-            voiceStatus = document.getElementById('voiceStatus');
-            connectionBadge = document.getElementById('connectionBadge');
+        function updateConnectionStatus(status) {
+            if (!connectionBadge) return;
 
-            console.log('📋 DOM elements initialized');
-        }
-
-        function setupVoiceTrigger() {
-            if (!voiceTrigger) return;
-
-            // Click/Touch event for voice trigger
-            voiceTrigger.addEventListener('click', handleVoiceTrigger);
-            voiceTrigger.addEventListener('touchstart', handleVoiceTrigger);
-
-            // Prevent default touch behaviors
-            voiceTrigger.addEventListener('touchstart', (e) => e.preventDefault());
-            voiceTrigger.addEventListener('touchend', (e) => e.preventDefault());
-
-            console.log('🎤 Voice trigger button initialized');
-        }
-
-        function handleVoiceTrigger() {
-            if (!conversationActive) {
-                updateVoiceStatus('Please wait, starting conversation...');
-                return;
-            }
-
-            if (currentState === 'idle') {
-                startListening();
-            } else if (currentState === 'listening') {
-                stopListening();
-            }
-        }
-
-        function startListening() {
-            if (!mediaRecorder || mediaRecorder.state !== 'inactive') return;
-
-            currentState = 'listening';
-            isListening = true;
-
-            // Update UI
-            voiceTrigger.classList.add('active', 'listening');
-            updateVoiceStatus('Listening... Speak now!');
-
-            // Start recording
-            try {
-                mediaRecorder.start(100); // 100ms chunks
-                console.log('🎤 Started listening');
-            } catch (error) {
-                console.error('Error starting recording:', error);
-                stopListening();
-            }
-        }
-
-        function stopListening() {
-            if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-
-            currentState = 'processing';
-            isListening = false;
-
-            // Update UI
-            voiceTrigger.classList.remove('listening');
-            voiceTrigger.classList.add('processing');
-            updateVoiceStatus('Processing... Please wait');
-
-            // Stop recording
-            try {
-                mediaRecorder.stop();
-                console.log('🛑 Stopped listening');
-            } catch (error) {
-                console.error('Error stopping recording:', error);
-            }
-        }
-
-        function updateVoiceStatus(message) {
-            if (voiceStatus) {
-                voiceStatus.textContent = message;
-            }
-        }
-
-        function setVoiceTriggerState(state, message) {
-            currentState = state;
-
-            // Reset all classes
-            voiceTrigger.classList.remove('active', 'listening', 'processing', 'speaking');
-
-            switch(state) {
-                case 'idle':
-                    updateVoiceStatus(message || 'Ready to chat with Nani');
+            switch(status) {
+                case 'connected':
+                    connectionBadge.textContent = '🟢 Connected';
+                    connectionBadge.style.background = 'linear-gradient(135deg, #4caf50, #8bc34a)';
                     break;
-                case 'listening':
-                    voiceTrigger.classList.add('active', 'listening');
-                    updateVoiceStatus(message || 'Listening... Speak now!');
+                case 'disconnected':
+                    connectionBadge.textContent = '🔴 Disconnected';
+                    connectionBadge.style.background = 'linear-gradient(135deg, #f44336, #ff7043)';
                     break;
-                case 'processing':
-                    voiceTrigger.classList.add('active', 'processing');
-                    updateVoiceStatus(message || 'Processing your message...');
-                    break;
-                case 'speaking':
-                    voiceTrigger.classList.add('active', 'speaking');
-                    updateVoiceStatus(message || 'Nani is speaking...');
-                    break;
+                default:
+                    connectionBadge.textContent = '🔄 Connecting...';
+                    connectionBadge.style.background = 'linear-gradient(135deg, #ff9800, #ffc107)';
             }
         }
 
@@ -534,121 +793,148 @@
             socket.on('connect', () => {
                 console.log('✅ Connected to server');
                 isConnected = true;
-                addStatusMessage('system', '🔗 Connected to server - ready for conversation!');
                 updateConnectionStatus('connected');
             });
 
             socket.on('disconnect', () => {
                 console.log('❌ Disconnected from server');
                 isConnected = false;
-                conversationActive = false;
-                addStatusMessage('system', '🔌 Disconnected from server - trying to reconnect...');
                 updateConnectionStatus('disconnected');
-                setCharacterState('');
             });
 
             socket.on('reconnect', () => {
                 console.log('🔄 Reconnected to server');
-                addStatusMessage('system', '✅ Reconnected to server!');
                 updateConnectionStatus('connected');
             });
 
-            // ElevenLabs-specific events
-            socket.on('conversation_started', (data) => {
-                console.log('🎯 Conversation started:', data);
-                conversationActive = data.success;
-                if (data.success) {
-                    useElevenLabs = true;
-                    addStatusMessage('system', '🎙️ Conversation started! Nani is ready...');
-                    setVoiceTriggerState('idle', 'Tap to talk with Nani');
-                } else {
-                    addStatusMessage('system', `❌ Failed to start conversation: ${data.error}`);
-                    setVoiceTriggerState('idle', 'Failed to start - please refresh');
-                }
-            });
-
-            socket.on('conversation_ended', (data) => {
-                console.log('🛑 Conversation ended:', data);
-                conversationActive = false;
-                addStatusMessage('system', '👋 Conversation ended. Restarting...');
-                setVoiceTriggerState('idle', 'Restarting conversation...');
-                // Auto-restart conversation
-                setTimeout(() => {
-                    if (socket && isConnected) {
-                        socket.emit('start_conversation', { topic: 'general' });
-                    }
-                }, 3000);
-            });
-
+            // Listen for agent responses to generate images
             socket.on('agent_response', (data) => {
                 console.log('🤖 Agent response:', data.response);
-                addStatusMessage('ai', data.response);
-                setVoiceTriggerState('speaking', 'Nani is speaking...');
 
-                // Auto-return to idle after response (simulating speech duration)
-                setTimeout(() => {
-                    if (currentState === 'speaking') {
-                        setVoiceTriggerState('idle', 'Tap to talk with Nani');
+                // Generate image for AI response
+                fetch('/create_image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ response: data.response })
+                })
+                .then(response => response.json())
+                .then(imageData => {
+                    console.log('🖼️ Image generated:', imageData.image_url);
+                    if (window.imageDisplayComponent) {
+                        window.imageDisplayComponent.displayImageForResponse(imageData, imageData.image_url);
                     }
-                }, 3000);
-
-                // call create_image api to get the image url and then pass it in imageDisplayComponent
-                // fetch('/create_image', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify({ response: data.response })
-                // })
-                // .then(response => response.json())
-                // .then(dataFromCreateImage => {
-                //     console.log('🖼️ Image URL:', dataFromCreateImage.image_url);
-                //     if (window.imageDisplayComponent) {
-                //         window.imageDisplayComponent.displayImageForResponse(dataFromCreateImage, dataFromCreateImage.image_url);
-                //     }
-                // })
-                // .catch(error => {
-                //     console.error('Error generating image:', error);
-                // });
+                })
+                .catch(error => {
+                    console.error('Error generating image:', error);
+                });
             });
 
-            socket.on('user_transcript', (data) => {
-                console.log('🎤 User transcript:', data.transcript);
-                addStatusMessage('user', data.transcript);
-                setVoiceTriggerState('processing', 'Processing your message...');
-            });
-
-            socket.on('agent_response_correction', (data) => {
-                console.log('🛠️ Agent correction:', data);
-                addStatusMessage('system', `Correction: ${data.original} → ${data.corrected}`);
-            });
-
-            socket.on('latency_measurement', (data) => {
-                console.log('⚡ Latency:', data.latency + 'ms');
-            });
-
-            socket.on('session_ended', (data) => {
-                console.log('🔚 Session ended:', data.conversation_id);
-                addStatusMessage('system', `Session completed. ID: ${data.conversation_id}`);
-                conversationActive = false;
-                setCharacterState('');
-            });
-
-            socket.on('error', (data) => {
+                        socket.on('error', (data) => {
                 console.error('❌ Socket error:', data);
-                addStatusMessage('system', `Error: ${data.error}`);
-                setCharacterState('');
-            });
-
-            socket.on('status_update', (data) => {
-                console.log('📊 Status update:', data);
-                conversationActive = data.session_active;
-                currentTopic = data.current_topic;
             });
         }
 
+        // LiveKit Voice Interface Functions
+        function setupLivekitVoiceInterface() {
+            if (!livekitVoiceTrigger) return;
+
+            // Click/Touch event for voice trigger
+            livekitVoiceTrigger.addEventListener('click', handleLivekitVoiceTrigger);
+            livekitVoiceTrigger.addEventListener('touchstart', handleLivekitVoiceTrigger);
+
+            // Prevent default touch behaviors
+            livekitVoiceTrigger.addEventListener('touchstart', (e) => e.preventDefault());
+            livekitVoiceTrigger.addEventListener('touchend', (e) => e.preventDefault());
+
+            console.log('🎤 LiveKit voice trigger initialized');
+        }
+
+        function handleLivekitVoiceTrigger() {
+            console.log('🎤 Voice trigger clicked, current state:', currentState);
+            if (currentState === 'idle') {
+                startLivekitListening();
+            } else if (currentState === 'listening') {
+                stopLivekitListening();
+            }
+        }
+
+        function startLivekitListening() {
+            if (!mediaRecorder || mediaRecorder.state !== 'inactive') return;
+
+            currentState = 'listening';
+            isRecording = true;
+
+            // Update UI
+            livekitVoiceTrigger.classList.add('active', 'listening');
+            updateLivekitVoiceStatus('सुन रहा हूं... बोलिए! (Listening... Speak now!)');
+
+            // Start recording
+            try {
+                audioChunks = [];
+                mediaRecorder.start();
+                console.log('🎤 Started listening for LiveKit');
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                stopLivekitListening();
+            }
+        }
+
+        function stopLivekitListening() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+            currentState = 'processing';
+            isRecording = false;
+
+            // Update UI
+            livekitVoiceTrigger.classList.remove('listening');
+            livekitVoiceTrigger.classList.add('processing');
+            updateLivekitVoiceStatus('प्रोसेसिंग... कृपया प्रतीक्षा करें (Processing... Please wait)');
+
+            // Stop recording
+            try {
+                mediaRecorder.stop();
+                console.log('🛑 Stopped listening for LiveKit');
+            } catch (error) {
+                console.error('Error stopping recording:', error);
+            }
+        }
+
+        function updateLivekitVoiceStatus(message) {
+            console.log('🔄 Status update:', message);
+            if (livekitVoiceStatus) {
+                livekitVoiceStatus.textContent = message;
+            }
+        }
+
+        function setLivekitVoiceTriggerState(state, message) {
+            currentState = state;
+
+            // Reset all classes
+            livekitVoiceTrigger.classList.remove('active', 'listening', 'processing', 'speaking');
+
+            switch(state) {
+                case 'idle':
+                    updateLivekitVoiceStatus(message || 'Ready to chat with Nani in Hindi');
+                    break;
+                case 'listening':
+                    livekitVoiceTrigger.classList.add('active', 'listening');
+                    updateLivekitVoiceStatus(message || 'सुन रहा हूं... बोलिए! (Listening... Speak now!)');
+                    break;
+                case 'processing':
+                    livekitVoiceTrigger.classList.add('active', 'processing');
+                    updateLivekitVoiceStatus(message || 'प्रोसेसिंग... (Processing...)');
+                    break;
+                case 'speaking':
+                    livekitVoiceTrigger.classList.add('active', 'speaking');
+                    updateLivekitVoiceStatus(message || 'नानी बोल रहीं हैं... (Nani is speaking...)');
+                    break;
+            }
+        }
+
         function initializeAudioRecording() {
-            console.log('🎙️ Initializing audio recording...');
+            console.log('🎙️ Initializing audio recording for LiveKit...');
 
             // Request microphone permission
             navigator.mediaDevices.getUserMedia({
@@ -660,86 +946,92 @@
                 }
             })
             .then(stream => {
-                audioStream = stream;
-
-                // Initialize MediaRecorder for streaming
+                // Initialize MediaRecorder
                 mediaRecorder = new MediaRecorder(stream, {
                     mimeType: 'audio/webm;codecs=opus'
                 });
 
-                // Handle data available for real-time streaming
+                // Handle data available
                 mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0 && conversationActive && isListening) {
-                        // Convert to base64 and stream immediately for ElevenLabs
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            const base64Audio = reader.result.split(',')[1];
-                            streamAudioChunk(base64Audio);
-                        };
-                        reader.readAsDataURL(event.data);
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
                     }
                 };
 
                 // Handle recording stop
                 mediaRecorder.onstop = () => {
-                    console.log('🎤 Recording stopped');
-                    // Reset to idle state after a short delay if no response comes
-                    setTimeout(() => {
-                        if (currentState === 'processing') {
-                            setVoiceTriggerState('idle', 'Tap to talk with Nani');
-                        }
-                    }, 10000); // 10 second timeout
+                    console.log('🎤 Recording stopped for LiveKit');
+
+                    // Create audio blob and send to server
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
+                    const reader = new FileReader();
+
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result.split(',')[1];
+                        sendAudioToLivekit(base64Audio);
+                    };
+
+                    reader.readAsDataURL(audioBlob);
+                    audioChunks = [];
                 };
 
-                addStatusMessage('system', '🎤 Microphone access granted! Ready to chat.');
+                updateLivekitVoiceStatus('🎤 Microphone ready! Tap to start talking with Nani');
+                console.log('✅ LiveKit audio recording initialized');
 
-                // Auto-start recording when conversation is active
-                startContinuousRecording();
+                // Test if the voice trigger button is properly set up
+                if (livekitVoiceTrigger) {
+                    console.log('✅ Voice trigger button found and ready');
+                } else {
+                    console.error('❌ Voice trigger button not found');
+                }
             })
             .catch(err => {
-                addStatusMessage('system', '❌ Microphone access denied. Please allow microphone access to use the voice assistant.');
+                updateLivekitVoiceStatus('❌ Microphone access needed. Please allow microphone access.');
                 console.error('Error accessing microphone:', err);
             });
         }
 
-        function startContinuousRecording() {
-            // Recording is now manual via trigger button
-            console.log('🎙️ Recording ready - use trigger button to start/stop');
+                function sendAudioToLivekit(base64Audio) {
+            console.log('📤 Sending audio to LiveKit processing...');
+
+            // Send audio to server for processing
+            fetch('/livekit_voice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    audio: base64Audio
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('✅ LiveKit response:', data.response);
+
+                    // Emit agent response for image generation
+                    if (socket && isConnected) {
+                        socket.emit('agent_response', { response: data.response });
+                    }
+
+                    setLivekitVoiceTriggerState('speaking', 'नानी बोल रहीं हैं... (Nani is speaking...)');
+
+                    // Return to idle after "speaking"
+                    setTimeout(() => {
+                        setLivekitVoiceTriggerState('idle', 'Ready to chat with Nani in Hindi');
+                    }, 3000);
+                } else {
+                    console.error('❌ LiveKit error:', data.error);
+                    setLivekitVoiceTriggerState('idle', 'Error processing voice. Try again.');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Network error:', error);
+                setLivekitVoiceTriggerState('idle', 'Network error. Try again.');
+            });
         }
 
-        function updateConnectionStatus(status) {
-            switch(status) {
-                case 'connected':
-                    connectionBadge.innerHTML = '🟢 Connected';
-                    connectionBadge.style.background = 'linear-gradient(135deg, #4CAF50, #81C784)';
-                    break;
-                case 'disconnected':
-                    connectionBadge.innerHTML = '🔴 Disconnected';
-                    connectionBadge.style.background = 'linear-gradient(135deg, #F44336, #E57373)';
-                    break;
-                case 'connecting':
-                    connectionBadge.innerHTML = '🟡 Connecting...';
-                    connectionBadge.style.background = 'linear-gradient(135deg, #FF9800, #FFB74D)';
-                    break;
-            }
-        }
 
-        function addStatusMessage(type, message) {
-            // Status display area removed, just log to console
-            let label = '';
-            switch(type) {
-                case 'user': label = 'You:'; break;
-                case 'ai': label = 'Nani:'; break;
-                case 'system': label = 'System:'; break;
-            }
-            console.log(`${label} ${message}`);
-        }
-
-        function streamAudioChunk(base64Audio) {
-            if (socket && isConnected && conversationActive) {
-                socket.emit('audio_chunk', { audio: base64Audio });
-            }
-        }
     </script>
 </body>
 </html>

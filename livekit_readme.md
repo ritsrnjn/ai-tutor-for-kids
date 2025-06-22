@@ -34,19 +34,19 @@ LIVEKIT_URL=<Your LiveKit WebSocket URL>
 ### 4. Download Model Files
 
 ```bash
-python agent.py download-files
+python livekit_sarvam.py download-files
 ```
 
 ## Usage
 
 ### Console Mode (Local Testing)
 ```bash
-python agent.py console
+python livekit_sarvam.py console
 ```
 
 ### Development Mode (Connect to LiveKit)
 ```bash
-python agent.py dev
+python livekit_sarvam.py dev
 ```
 
 ## Features
@@ -60,7 +60,7 @@ python agent.py dev
 
 ## Configuration
 
-The agent is configured for Hindi (`hi-IN`) by default. You can modify the language in `agent.py`:
+The agent is configured for Hindi (`hi-IN`) by default. You can modify the language in `livekit_sarvam.py`:
 
 ```python
 stt=sarvam.STT(

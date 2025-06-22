@@ -8,9 +8,20 @@ import image_util
 # Load environment variables
 load_dotenv()
 
-# Import ElevenLabs and LiveKit integrations
-import elevenlabs_integration
-import livekit_elevenlabs_integration
+# Choose platform at startup
+PLATFORM = os.getenv('PLATFORM', 'elevenlabs').lower()
+print(f"🚀 Starting with platform: {PLATFORM.upper()}")
+
+# Import based on chosen platform
+if PLATFORM == 'livekit':
+    import livekit_integration as ai_platform
+    PLATFORM_NAME = "LiveKit + Sarvam"
+    print("📡 Loading LiveKit integration...")
+else:
+    import elevenlabs_integration as ai_platform
+    PLATFORM_NAME = "ElevenLabs"
+    print("🎙️ Loading ElevenLabs integration...")
+
 import image_util
 
 app = Flask(__name__)
@@ -21,7 +32,14 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Pass platform info to template so it can render the right interface
+    return render_template('index.html', platform=PLATFORM, platform_name=PLATFORM_NAME)
+
+@app.route('/demo')
+def demo():
+    """Demo page to choose between platforms"""
+    with open('demo_platforms.html', 'r') as f:
+        return f.read()
 
 @app.route('/set_topic', methods=['POST'])
 def set_topic():
@@ -33,83 +51,68 @@ def set_topic():
         if not topic:
             return jsonify({'error': 'No topic provided'}), 400
 
-        # Set topic for both ElevenLabs and LiveKit integrations
-        elevenlabs_result = elevenlabs_integration.set_topic(topic)
-        livekit_elevenlabs_integration.set_livekit_topic(topic)
-
-        if elevenlabs_result:
+        # Use the chosen platform
+        if PLATFORM == 'livekit':
+            result = ai_platform.set_topic(topic)
             return jsonify({
-                'success': True,
-                'message': f'Topic set to: {topic}',
+                'success': result['success'],
+                'message': f'Topic set to: {topic} for {PLATFORM_NAME}',
                 'topic': topic,
-                'integrations': ['elevenlabs', 'livekit']
+                'platform': PLATFORM
             })
         else:
-            return jsonify({'error': 'Failed to set topic'}), 500
+            result = ai_platform.set_topic(topic)
+            if result:
+                return jsonify({
+                    'success': True,
+                    'message': f'Topic set to: {topic} for {PLATFORM_NAME}',
+                    'topic': topic,
+                    'platform': PLATFORM
+                })
+            else:
+                return jsonify({'error': f'Failed to set topic in {PLATFORM_NAME}'}), 500
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ElevenLabs-specific routes and SocketIO handlers
-@app.route('/elevenlabs/status', methods=['GET'])
-def elevenlabs_status():
-    """Get ElevenLabs conversation status"""
+@app.route('/status', methods=['GET'])
+def status():
+    """Get current platform status"""
     try:
-        status = elevenlabs_integration.get_status()
-        return jsonify(status)
+        status_data = ai_platform.get_status()
+        status_data['platform'] = PLATFORM
+        status_data['platform_name'] = PLATFORM_NAME
+        return jsonify(status_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/elevenlabs/start_conversation', methods=['POST'])
-def start_elevenlabs_conversation():
-    """Start an ElevenLabs conversation session"""
+@app.route('/start_session', methods=['POST'])
+def start_session():
+    """Start a session with the chosen platform"""
     try:
         data = request.json or {}
         topic = data.get('topic')
 
-        result = elevenlabs_integration.start_conversation(topic)
+        if PLATFORM == 'livekit':
+            room_name = data.get('room_name', 'nani-hindi-tutor')
+            result = ai_platform.start_session(topic, room_name)
+        else:
+            result = ai_platform.start_conversation(topic)
+
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/elevenlabs/end_conversation', methods=['POST'])
-def end_elevenlabs_conversation():
-    """End the current ElevenLabs conversation session"""
+@app.route('/end_session', methods=['POST'])
+def end_session():
+    """End the current session"""
     try:
-        result = elevenlabs_integration.end_conversation()
+        if PLATFORM == 'livekit':
+            result = ai_platform.end_session()
+        else:
+            result = ai_platform.end_conversation()
+
         return jsonify(result)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# LiveKit-specific routes
-@app.route('/livekit/status', methods=['GET'])
-def livekit_status():
-    """Get LiveKit status"""
-    try:
-        return jsonify({
-            'success': True,
-            'current_topic': livekit_elevenlabs_integration.current_topic,
-            'message': 'LiveKit integration ready'
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/livekit/set_topic', methods=['POST'])
-def set_livekit_topic():
-    """Set topic for LiveKit session"""
-    try:
-        data = request.json
-        topic = data.get('topic')
-
-        if not topic:
-            return jsonify({'error': 'No topic provided'}), 400
-
-        livekit_elevenlabs_integration.set_livekit_topic(topic)
-        return jsonify({
-            'success': True,
-            'message': f'LiveKit topic set to: {topic}',
-            'topic': topic
-        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -136,12 +139,57 @@ def create_image():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/livekit_voice', methods=['POST'])
+def livekit_voice():
+    """Handle voice input for LiveKit platform"""
+    try:
+        if PLATFORM != 'livekit':
+            return jsonify({'error': 'Not in LiveKit mode'}), 400
+
+        data = request.json
+        audio_data = data.get('audio')
+
+        if not audio_data:
+            return jsonify({'error': 'No audio data provided'}), 400
+
+        # For now, simulate processing and return a Hindi response
+        # In a real implementation, this would:
+        # 1. Convert audio to text using Sarvam STT
+        # 2. Process with OpenAI
+        # 3. Convert response to speech using Sarvam TTS
+
+        import random
+        hindi_responses = [
+            'नमस्ते! आप कैसे हैं? (Hello! How are you?)',
+            'आज हम हिंदी सीखेंगे। (Today we will learn Hindi.)',
+            'बहुत अच्छा! (Very good!)',
+            'क्या आप और कुछ सीखना चाहते हैं? (Do you want to learn something more?)',
+            'शाबाश! आप अच्छा बोल रहे हैं। (Excellent! You are speaking well.)',
+            'हिंदी में "पानी" का मतलब "water" है। (In Hindi, "पानी" means "water".)',
+            'आप बहुत अच्छे छात्र हैं! (You are a very good student!)'
+        ]
+
+        response_text = random.choice(hindi_responses)
+
+        return jsonify({
+            'success': True,
+            'response': response_text,
+            'user_transcript': 'Processing your voice...',
+            'platform': 'livekit'
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # SocketIO event handlers for real-time communication
 @socketio.on('connect')
 def handle_connect():
     """Handle WebSocket connection"""
     print('Client connected')
-    emit('status', {'message': 'Connected to server'})
+    emit('status', {
+        'message': f'Connected to server using {PLATFORM_NAME}',
+        'platform': PLATFORM
+    })
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -150,34 +198,47 @@ def handle_disconnect():
 
 @socketio.on('start_conversation')
 def handle_start_conversation(data):
-    """Handle start conversation request via WebSocket"""
+    """Handle start conversation request via WebSocket (legacy compatibility)"""
     try:
         topic = data.get('topic')
-        result = elevenlabs_integration.start_conversation(topic)
-        emit('conversation_started', result)
+
+        if PLATFORM == 'livekit':
+            room_name = data.get('room_name', 'nani-hindi-tutor')
+            result = ai_platform.start_session(topic, room_name)
+            emit('session_started', result)
+        else:
+            result = ai_platform.start_conversation(topic)
+            emit('conversation_started', result)
     except Exception as e:
-        emit('error', {'error': str(e)})
+        emit('error', {'error': str(e), 'platform': PLATFORM})
 
 @socketio.on('end_conversation')
 def handle_end_conversation():
-    """Handle end conversation request via WebSocket"""
+    """Handle end conversation request via WebSocket (legacy compatibility)"""
     try:
-        result = elevenlabs_integration.end_conversation()
-        emit('conversation_ended', result)
+        if PLATFORM == 'livekit':
+            result = ai_platform.end_session()
+            emit('session_ended', result)
+        else:
+            result = ai_platform.end_conversation()
+            emit('conversation_ended', result)
     except Exception as e:
-        emit('error', {'error': str(e)})
+        emit('error', {'error': str(e), 'platform': PLATFORM})
 
 @socketio.on('audio_chunk')
 def handle_audio_chunk(data):
-    """Handle incoming audio chunks for ElevenLabs"""
+    """Handle incoming audio chunks"""
     try:
         audio_data = data.get('audio')
         if audio_data:
             # Convert base64 to bytes
             audio_bytes = base64.b64decode(audio_data)
-            result = elevenlabs_integration.send_audio(audio_bytes)
-            if not result['success']:
-                emit('error', result)
+
+            if PLATFORM == 'elevenlabs':
+                result = ai_platform.send_audio(audio_bytes)
+                if not result['success']:
+                    emit('error', result)
+            # LiveKit handles audio differently - through WebRTC
     except Exception as e:
         emit('error', {'error': str(e)})
 
@@ -185,45 +246,69 @@ def handle_audio_chunk(data):
 def handle_get_status():
     """Handle status request via WebSocket"""
     try:
-        status = elevenlabs_integration.get_status()
-        emit('status_update', status)
+        status_data = ai_platform.get_status()
+        status_data['platform'] = PLATFORM
+        status_data['platform_name'] = PLATFORM_NAME
+        emit('status_update', status_data)
     except Exception as e:
         emit('error', {'error': str(e)})
 
-# Set up ElevenLabs callbacks for WebSocket communication
-def setup_elevenlabs_callbacks():
-    """Set up callbacks for ElevenLabs events"""
+# Set up platform-specific callbacks
+def setup_callbacks():
+    """Set up callbacks based on chosen platform"""
     def on_agent_response(response):
-        socketio.emit('agent_response', {'response': response})
-
-    def on_user_transcript(transcript):
-        socketio.emit('user_transcript', {'transcript': transcript})
-
-    def on_agent_response_correction(original, corrected):
-        socketio.emit('agent_response_correction', {
-            'original': original,
-            'corrected': corrected
+        socketio.emit('agent_response', {
+            'response': response,
+            'platform': PLATFORM
         })
 
-    def on_latency_measurement(latency):
-        socketio.emit('latency_measurement', {'latency': latency})
+    def on_user_transcript(transcript):
+        socketio.emit('user_transcript', {
+            'transcript': transcript,
+            'platform': PLATFORM
+        })
 
-    def on_session_end(conversation_id):
-        socketio.emit('session_ended', {'conversation_id': conversation_id})
+    def on_session_end(session_info):
+        socketio.emit('session_ended', {
+            'session_info': session_info,
+            'platform': PLATFORM
+        })
 
-    # Set the callbacks
-    elevenlabs_integration.elevenlabs_manager.set_callbacks(
-        on_agent_response=on_agent_response,
-        on_user_transcript=on_user_transcript,
-        on_agent_response_correction=on_agent_response_correction,
-        on_latency_measurement=on_latency_measurement,
-        on_session_end=on_session_end
-    )
+    # Set callbacks based on platform
+    if PLATFORM == 'livekit':
+        ai_platform.set_callbacks(
+            on_agent_response=on_agent_response,
+            on_user_transcript=on_user_transcript,
+            on_session_end=on_session_end
+        )
+    else:
+        def on_agent_response_correction(original, corrected):
+            socketio.emit('agent_response_correction', {
+                'original': original,
+                'corrected': corrected,
+                'platform': PLATFORM
+            })
 
-# Initialize ElevenLabs callbacks
-setup_elevenlabs_callbacks()
+        def on_latency_measurement(latency):
+            socketio.emit('latency_measurement', {
+                'latency': latency,
+                'platform': PLATFORM
+            })
+
+        ai_platform.elevenlabs_manager.set_callbacks(
+            on_agent_response=on_agent_response,
+            on_user_transcript=on_user_transcript,
+            on_agent_response_correction=on_agent_response_correction,
+            on_latency_measurement=on_latency_measurement,
+            on_session_end=on_session_end
+        )
+
+# Initialize callbacks
+setup_callbacks()
 
 if __name__ == '__main__':
-    print("Starting server with ElevenLabs + LiveKit integration")
+    print(f"🌟 Starting server with {PLATFORM_NAME} integration")
+    print(f"🎯 Platform: {PLATFORM.upper()}")
+    print(f"📍 Available at: http://localhost:5001")
     # Use SocketIO's run method instead of app.run for WebSocket support
     socketio.run(app, host='0.0.0.0', port=5001, debug=True)

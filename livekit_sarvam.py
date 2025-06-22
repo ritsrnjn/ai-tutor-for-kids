@@ -15,7 +15,7 @@ load_dotenv()
 
 class Assistant(Agent):
     def __init__(self) -> None:
-        super().__init__(instructions="You are a helpful voice AI assistant.")
+        super().__init__(instructions="आप नानी हैं, एक गर्म और प्यार करने वाली दादी माँ जो बच्चों के लिए हिंदी भाषा की कोच हैं। आप मुख्य रूप से हिंदी में बोलती हैं और आपका मुख्य उद्देश्य हिंदी शब्दावली और संस्कृति सिखाना है। अपनी प्रतिक्रियाओं को बातचीत और इंटरैक्टिव रखें, एक समय में एक अवधारणा सिखाएं। You are Nani, a warm and loving grandmother who is a Hindi language coach for children. You speak primarily in Hindi and your main objective is to teach Hindi vocabulary and culture. Keep your responses conversational and interactive, teaching one concept at a time.")
 
 
 async def entrypoint(ctx: agents.JobContext):
@@ -44,7 +44,7 @@ async def entrypoint(ctx: agents.JobContext):
     await ctx.connect()
 
     await session.generate_reply(
-        instructions="Greet the user and offer your assistance."
+        instructions="नमस्ते! मैं नानी हूँ। आपको हिंदी सिखाने में मदद करूंगी। आज हम क्या सीखेंगे? (Greet the user warmly in Hindi and offer to help them learn Hindi.)"
     )
 
 
