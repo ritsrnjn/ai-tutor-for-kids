@@ -67,6 +67,8 @@ def set_topic():
         else:
             result = ai_platform.set_topic(topic)
             if result:
+                # Emit topic update to connected clients for dynamic variables
+                socketio.emit('topic_updated', {'topic': topic, 'platform': PLATFORM})
                 return jsonify({
                     'success': True,
                     'message': f'Topic set to: {topic} for {PLATFORM_NAME}',

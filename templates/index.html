@@ -640,8 +640,12 @@
         <!-- Left Side - Platform-specific Widget -->
         <div class="left-widget">
             {% if platform == 'elevenlabs' %}
-                <!-- ElevenLabs ConvAI Embed -->
-                <elevenlabs-convai agent-id="agent_01jy9sz4gnew0vedv885xsrse1"></elevenlabs-convai>
+                <!-- ElevenLabs ConvAI Embed with Dynamic Variables Support -->
+                <elevenlabs-convai
+                    agent-id="agent_01jy9sz4gnew0vedv885xsrse1"
+                    id="elevenlabs-widget"
+                    dynamic-variables='{"learning_topic": "animals", "session_type": "hindi_learning"}'>
+                </elevenlabs-convai>
                         {% else %}
                 <!-- LiveKit Voice Interface -->
                 <div class="livekit-voice-interface">
@@ -715,6 +719,21 @@
         let isRecording = false;
         let currentState = 'idle'; // idle, listening, processing, speaking
         let platform = '{{ platform }}';
+
+        // Function to update ElevenLabs widget dynamic variables
+        function updateElevenLabsDynamicVariables(topic) {
+            if (platform === 'elevenlabs') {
+                const widget = document.getElementById('elevenlabs-widget');
+                if (widget) {
+                    const dynamicVars = {
+                        "learning_topic": topic || "general",
+                        "session_type": "hindi_learning"
+                    };
+                    widget.setAttribute('dynamic-variables', JSON.stringify(dynamicVars));
+                    console.log('📝 Updated ElevenLabs dynamic variables:', dynamicVars);
+                }
+            }
+        }
 
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -829,6 +848,12 @@
                 .catch(error => {
                     console.error('Error generating image:', error);
                 });
+            });
+
+            // Listen for topic updates from backend
+            socket.on('topic_updated', (data) => {
+                console.log('📚 Topic updated:', data.topic);
+                updateElevenLabsDynamicVariables(data.topic);
             });
 
                         socket.on('error', (data) => {

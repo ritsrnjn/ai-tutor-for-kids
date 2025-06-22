@@ -6,6 +6,7 @@ from typing import Optional, Callable, List, Dict, Any
 from elevenlabs.client import ElevenLabs
 from elevenlabs.conversational_ai.conversation import Conversation
 from elevenlabs.conversational_ai.default_audio_interface import DefaultAudioInterface
+from elevenlabs.conversational_ai.conversation import ConversationInitiationData
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -120,7 +121,7 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
 
     def start_conversation_session(self, topic: str = None) -> dict:
         """
-        Start a new conversation session with ElevenLabs
+        Start a new conversation session with ElevenLabs using dynamic variables for topic
         """
         try:
             if self.is_session_active:
@@ -128,14 +129,31 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
 
             if topic:
                 self.current_topic = topic
-                # For now, we'll pass the topic context through conversation
-                # In a production setup, you might want to update the agent configuration
 
-            # Create conversation instance
+            # Prepare dynamic variables for ElevenLabs agent
+            dynamic_vars = {}
+            if topic:
+                dynamic_vars["learning_topic"] = topic
+                # You can add more variables as needed
+                dynamic_vars["session_type"] = "hindi_learning"
+                print(f"[DEBUG] Setting dynamic variables: {dynamic_vars}")
+
+            # Create conversation configuration with dynamic variables
+            config = None
+            if dynamic_vars:
+                config = ConversationInitiationData(
+                    dynamic_variables=dynamic_vars
+                )
+                print(f"[DEBUG] Created ConversationInitiationData with dynamic variables")
+
+            # Create conversation instance with dynamic variables
             self.conversation = Conversation(
                 # API client and agent ID
                 self.client,
                 self.agent_id,
+
+                # Pass the configuration with dynamic variables
+                config=config,
 
                 # Assume auth is required when API_KEY is set
                 requires_auth=bool(self.api_key),
@@ -155,7 +173,7 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
             self.conversation.start_session()
             self.is_session_active = True
 
-            print(f"[DEBUG] Session started, checking for conversation ID...")
+            print(f"[DEBUG] Session started with topic '{topic}' passed as dynamic variable")
             print(f"[DEBUG] Conversation object attributes: {dir(self.conversation)}")
 
             # Get the conversation ID for transcript polling
@@ -182,22 +200,17 @@ Stay in character as the loving grandmother Nani throughout the entire conversat
                 # Start polling with a delayed ID lookup
                 # self.start_transcript_polling_with_delay()  # Disabled
 
-            # If we have a topic, send it as context
-            if topic:
-                # Send topic context to the agent
-                topic_intro = f"Let's learn about {topic} today!"
-                # Note: In a real implementation, you might send this differently
-                # depending on how the ElevenLabs conversation API works
-
             return {
                 'success': True,
-                'message': f'Conversation started successfully',
+                'message': f'Conversation started successfully with topic: {topic}',
                 'topic': self.current_topic,
                 'session_active': self.is_session_active,
-                'conversation_id': self.conversation_id
+                'conversation_id': self.conversation_id,
+                'dynamic_variables': dynamic_vars
             }
 
         except Exception as e:
+            print(f"[ERROR] Failed to start conversation: {e}")
             return {
                 'success': False,
                 'error': str(e),
