@@ -28,7 +28,8 @@ const VoiceTrigger: React.FC = () => {
     { id: 'numbers', label: 'Numbers', emoji: '🔢', description: 'Practice counting and numbers' },
     { id: 'food', label: 'Food', emoji: '🍽️', description: 'Learn about different foods' },
     { id: 'family', label: 'Family', emoji: '👨‍👩‍👧‍👦', description: 'Family relationships and members' },
-    { id: 'body-parts', label: 'Body Parts', emoji: '👤', description: 'Learn about body parts' }
+    { id: 'body-parts', label: 'Body Parts', emoji: '👤', description: 'Learn about body parts' },
+    { id: 'shlokas-vandana', label: 'Shlokas and Vandana', emoji: '🕉️', description: 'Learn sacred Sanskrit verses and prayers' }
   ];
 
   // Handle topic selection
